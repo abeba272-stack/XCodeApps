@@ -28,4 +28,8 @@ enum StablePicker {
 
         return selections
     }
+
+    static func shuffled(_ values: [String], seed: String, salt: String) -> [String] {
+        picks(values, count: values.count, seed: seed, salt: salt)
+    }
 }

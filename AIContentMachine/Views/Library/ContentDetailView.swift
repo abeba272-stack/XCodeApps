@@ -6,55 +6,18 @@ struct ContentDetailView: View {
     @Bindable var project: ContentProject
 
     var body: some View {
-        Form {
-            Section("Project") {
-                TextField("Title", text: $project.title)
-                TextField("Topic", text: $project.topic)
-                TextField("Category", text: $project.category)
-                Picker("Status", selection: Binding(
-                    get: { project.status },
-                    set: { project.status = $0 }
-                )) {
-                    ForEach(ProjectStatus.allCases) { status in
-                        Text(status.rawValue).tag(status)
-                    }
-                }
+        ScrollView {
+            VStack(alignment: .leading, spacing: 18) {
+                heroCard
+                projectCard
+                coreCopyCard
+                scriptCard
+                listCard
+                notesCard
             }
-
-            Section("Core Copy") {
-                TextField("Overview", text: $project.overview, axis: .vertical)
-                TextField("Hook", text: $project.hook, axis: .vertical)
-                TextField("Caption", text: $project.caption, axis: .vertical)
-                TextField("CTA", text: $project.cta, axis: .vertical)
-            }
-
-            Section("Script") {
-                TextEditor(text: $project.script)
-                    .frame(minHeight: 180)
-                TextEditor(text: $project.voiceover)
-                    .frame(minHeight: 120)
-            }
-
-            Section("Lists") {
-                TextEditor(text: Binding(
-                    get: { project.hashtags.joined(separator: " ") },
-                    set: { project.hashtags = $0.split(separator: " ").map(String.init) }
-                ))
-                .frame(minHeight: 100)
-
-                TextEditor(text: Binding(
-                    get: { project.shotList.joined(separator: "\n") },
-                    set: { project.shotList = $0.split(separator: "\n").map(String.init) }
-                ))
-                .frame(minHeight: 120)
-            }
-
-            Section("Notes") {
-                TextEditor(text: $project.notes)
-                    .frame(minHeight: 120)
-            }
+            .padding(AppTheme.screenPadding)
+            .padding(.bottom, 32)
         }
-        .scrollContentBackground(.hidden)
         .background(PremiumBackground())
         .navigationTitle("Content Detail")
         .toolbar {
@@ -63,7 +26,145 @@ struct ContentDetailView: View {
                     project.updatedAt = .now
                     try? modelContext.save()
                 }
+                .buttonStyle(AppQuietButtonStyle())
             }
+        }
+    }
+
+    private var heroCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 14) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(project.title)
+                            .font(.system(size: 29, weight: .bold, design: .rounded))
+                            .foregroundStyle(AppTheme.textPrimary)
+                        Text("\(project.platform.rawValue) • \(project.category) • Score \(project.contentScore)")
+                            .font(.system(size: 13, weight: .semibold, design: .rounded))
+                            .foregroundStyle(AppTheme.textSecondary)
+                    }
+                    Spacer()
+                    StatusBadge(status: project.status)
+                }
+
+                HStack(spacing: 10) {
+                    TagChip(title: project.goal.rawValue, icon: "target")
+                    TagChip(title: project.tone.rawValue, icon: "waveform.path.ecg")
+                    TagChip(title: project.durationLabel, icon: "timer")
+                }
+            }
+        }
+    }
+
+    private var projectCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 14) {
+                SectionHeaderView(title: "Project", subtitle: "Core metadata and pipeline status.", eyebrow: "Meta")
+                inputField("Title", text: $project.title)
+                inputField("Topic", text: $project.topic)
+                inputField("Category", text: $project.category)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Status")
+                        .font(.system(size: 14, weight: .bold, design: .rounded))
+                        .foregroundStyle(AppTheme.textPrimary)
+                    Picker("Status", selection: Binding(
+                        get: { project.status },
+                        set: { project.status = $0 }
+                    )) {
+                        ForEach(ProjectStatus.allCases) { status in
+                            Text(status.rawValue).tag(status)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
+            }
+        }
+    }
+
+    private var coreCopyCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 14) {
+                SectionHeaderView(title: "Core copy", subtitle: "High-signal text blocks the viewer actually sees.", eyebrow: "Copy")
+                editorField("Overview", text: $project.overview, height: 120)
+                editorField("Hook", text: $project.hook, height: 120)
+                editorField("Caption", text: $project.caption, height: 160)
+                editorField("CTA", text: $project.cta, height: 100)
+            }
+        }
+    }
+
+    private var scriptCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 14) {
+                SectionHeaderView(title: "Script", subtitle: "Recording beats and voiceover copy.", eyebrow: "Delivery")
+                editorField("Script", text: $project.script, height: 220)
+                editorField("Voiceover", text: $project.voiceover, height: 150)
+            }
+        }
+    }
+
+    private var listCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 14) {
+                SectionHeaderView(title: "Lists", subtitle: "Hashtags, shot list, and supporting structure.", eyebrow: "Assets")
+
+                editorField(
+                    "Hashtags",
+                    text: Binding(
+                        get: { project.hashtags.joined(separator: " ") },
+                        set: { project.hashtags = $0.split(separator: " ").map(String.init) }
+                    ),
+                    height: 100
+                )
+
+                editorField(
+                    "Shot list",
+                    text: Binding(
+                        get: { project.shotList.joined(separator: "\n") },
+                        set: { project.shotList = $0.split(separator: "\n").map(String.init) }
+                    ),
+                    height: 150
+                )
+            }
+        }
+    }
+
+    private var notesCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 14) {
+                SectionHeaderView(title: "Notes", subtitle: "Local reminders and refinements.", eyebrow: "Notes")
+                editorField("Notes", text: $project.notes, height: 150)
+            }
+        }
+    }
+
+    private func inputField(_ title: String, text: Binding<String>) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundStyle(AppTheme.textPrimary)
+            TextField(title, text: text)
+                .foregroundStyle(AppTheme.textPrimary)
+                .premiumInputStyle()
+        }
+    }
+
+    private func editorField(_ title: String, text: Binding<String>, height: CGFloat) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(title)
+                .font(.system(size: 14, weight: .bold, design: .rounded))
+                .foregroundStyle(AppTheme.textPrimary)
+            TextEditor(text: text)
+                .scrollContentBackground(.hidden)
+                .foregroundStyle(AppTheme.textPrimary)
+                .frame(minHeight: height)
+                .padding(10)
+                .background(AppTheme.surfaceSecondary, in: RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous)
+                        .stroke(AppTheme.border, lineWidth: 1)
+                )
         }
     }
 }

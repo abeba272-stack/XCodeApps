@@ -192,12 +192,26 @@ enum ContentSection: String, CaseIterable, Identifiable {
     case notes = "Notes"
 
     var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .overview: "rectangle.text.magnifyingglass"
+        case .hook: "bolt.horizontal.fill"
+        case .script: "text.alignleft"
+        case .caption: "text.quote"
+        case .hashtags: "number"
+        case .cta: "paperplane.fill"
+        case .shotList: "camera.viewfinder"
+        case .notes: "note.text"
+        }
+    }
 }
 
 enum ContentSortOption: String, CaseIterable, Identifiable {
     case newest = "Newest"
     case oldest = "Oldest"
     case favorites = "Favorites"
+    case topScore = "Top Score"
 
     var id: String { rawValue }
 }

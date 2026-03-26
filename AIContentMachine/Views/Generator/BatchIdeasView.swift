@@ -9,72 +9,102 @@ struct BatchIdeasView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                GlassCard {
-                    VStack(alignment: .leading, spacing: 16) {
+                heroCard
+                ideasCard
+                actionBar
+            }
+            .padding(AppTheme.screenPadding)
+            .padding(.bottom, 32)
+        }
+        .navigationTitle("Batch Ideas")
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: Binding(
+            get: { !viewModel.shareItems.isEmpty },
+            set: { if !$0 { viewModel.shareItems = [] } }
+        )) {
+            ShareSheet(items: viewModel.shareItems)
+        }
+    }
+
+    private var heroCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 16) {
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 8) {
                         Text(project.title)
-                            .font(.system(size: 28, weight: .bold, design: .rounded))
+                            .font(.system(size: 29, weight: .bold, design: .rounded))
                             .foregroundStyle(AppTheme.textPrimary)
                         Text(project.overview)
                             .font(.system(size: 15, weight: .medium, design: .rounded))
                             .foregroundStyle(AppTheme.textSecondary)
-
-                        HStack {
-                            StatusBadge(status: project.status)
-                            Spacer()
-                            Text("Score \(project.contentScore)")
-                                .font(.system(size: 14, weight: .bold, design: .rounded))
-                                .foregroundStyle(AppTheme.accentGlow)
-                        }
                     }
+                    Spacer()
+                    StatusBadge(status: project.status)
                 }
 
-                GlassCard {
-                    VStack(alignment: .leading, spacing: 14) {
-                        SectionHeaderView(title: "10 strong ideas", subtitle: "Built for \(project.platform.rawValue)")
-                        ForEach(Array(project.batchIdeas.enumerated()), id: \.offset) { index, idea in
-                            HStack(alignment: .top, spacing: 12) {
-                                Text("\(index + 1)")
-                                    .font(.system(size: 13, weight: .heavy, design: .rounded))
-                                    .foregroundStyle(AppTheme.accentGlow)
-                                    .frame(width: 28, alignment: .leading)
-                                Text(idea)
-                                    .font(.system(size: 15, weight: .medium, design: .rounded))
-                                    .foregroundStyle(AppTheme.textPrimary)
-                            }
-                        }
-                    }
+                HStack(spacing: 10) {
+                    TagChip(title: project.platform.rawValue, icon: project.platform.icon)
+                    TagChip(title: "Score \(project.contentScore)", isSelected: project.contentScore >= 80, icon: "sparkles")
+                    TagChip(title: project.goal.rawValue, icon: "target")
                 }
-
-                actionBar
             }
-            .padding(20)
         }
-        .navigationTitle("Batch Ideas")
-        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private var ideasCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 14) {
+                SectionHeaderView(
+                    title: "10 strong ideas",
+                    subtitle: "Built for \(project.platform.rawValue) with reusable creator angles.",
+                    eyebrow: "Batch"
+                )
+
+                ForEach(Array(project.batchIdeas.enumerated()), id: \.offset) { index, idea in
+                    HStack(alignment: .top, spacing: 12) {
+                        Text("\(index + 1)")
+                            .font(.system(size: 13, weight: .heavy, design: .rounded))
+                            .foregroundStyle(AppTheme.accentGlow)
+                            .frame(width: 28, alignment: .leading)
+
+                        Text(idea)
+                            .font(.system(size: 15, weight: .medium, design: .rounded))
+                            .foregroundStyle(AppTheme.textPrimary)
+                    }
+                    .padding(14)
+                    .background(AppTheme.surfaceSecondary, in: RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous))
+                    .overlay(
+                        RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous)
+                            .stroke(AppTheme.border, lineWidth: 1)
+                    )
+                }
+            }
+        }
     }
 
     private var actionBar: some View {
         GlassCard {
-            VStack(spacing: 12) {
+            VStack(alignment: .leading, spacing: 12) {
+                SectionHeaderView(
+                    title: "Actions",
+                    subtitle: "Save the batch, copy it, or share it as a formatted text block.",
+                    eyebrow: "Export"
+                )
+
                 Button("Save Draft") {
                     viewModel.saveDraft(context: modelContext)
                 }
-                .buttonStyle(.borderedProminent)
-                .tint(AppTheme.accentGlow)
+                .buttonStyle(AppPrimaryButtonStyle())
 
-                HStack(spacing: 12) {
+                HStack(spacing: 10) {
                     CopyButton(title: "Copy All") { viewModel.copyFullPackage() }
+
                     Button {
                         viewModel.prepareSharePackage()
                     } label: {
                         Label("Share", systemImage: "square.and.arrow.up")
-                            .font(.system(size: 13, weight: .semibold, design: .rounded))
-                            .foregroundStyle(AppTheme.textPrimary)
-                            .padding(.horizontal, 14)
-                            .padding(.vertical, 10)
-                            .background(AppTheme.surfaceSecondary, in: Capsule(style: .continuous))
                     }
-                    .buttonStyle(.plain)
+                    .buttonStyle(AppQuietButtonStyle())
                 }
             }
         }

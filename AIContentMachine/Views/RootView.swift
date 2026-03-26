@@ -19,9 +19,21 @@ struct RootView: View {
             PremiumBackground()
 
             if !isBootstrapped {
-                ProgressView("Preparing workspace")
-                    .tint(AppTheme.accentGlow)
-                    .foregroundStyle(AppTheme.textPrimary)
+                GlassCard {
+                    VStack(spacing: 14) {
+                        ProgressView()
+                            .tint(AppTheme.accentGlow)
+                            .scaleEffect(1.15)
+                        Text("Preparing workspace")
+                            .font(.system(size: 20, weight: .bold, design: .rounded))
+                            .foregroundStyle(AppTheme.textPrimary)
+                        Text("Loading your profile, templates, planner data, and offline generator.")
+                            .font(.system(size: 14, weight: .medium, design: .rounded))
+                            .foregroundStyle(AppTheme.textSecondary)
+                            .multilineTextAlignment(.center)
+                    }
+                    .frame(maxWidth: 360)
+                }
             } else if let profile = profiles.first, let appSettings = settings.first {
                 if profile.onboardingCompleted {
                     MainShellView(
@@ -35,8 +47,17 @@ struct RootView: View {
                     OnboardingContainerView(profile: profile)
                 }
             } else {
-                Text(bootstrapError ?? "Unable to load app data.")
-                    .foregroundStyle(AppTheme.textPrimary)
+                VStack {
+                    EmptyStateView(
+                        title: "Unable to load app data",
+                        message: bootstrapError ?? "The app could not initialize local data.",
+                        buttonTitle: nil,
+                        action: nil,
+                        icon: "exclamationmark.triangle.fill",
+                        eyebrow: "Error"
+                    )
+                }
+                .padding(AppTheme.screenPadding)
             }
         }
         .task {
@@ -81,7 +102,9 @@ private struct MainShellView: View {
                     projects: projects,
                     templates: templates,
                     assignments: assignments,
-                    onCreateContent: { selectedTab = .create }
+                    onCreateContent: { selectedTab = .create },
+                    onOpenPlanner: { selectedTab = .planner },
+                    onOpenLibrary: { selectedTab = .library }
                 )
             }
             .tabItem { Label("Dashboard", systemImage: "square.grid.2x2.fill") }
