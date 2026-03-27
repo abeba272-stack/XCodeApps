@@ -1,6 +1,7 @@
 import SwiftUI
 
 struct DashboardView: View {
+    let container: AppContainer
     let profile: UserProfile
     let settings: AppSettings
     let projects: [ContentProject]
@@ -42,7 +43,7 @@ struct DashboardView: View {
         }
         .sheet(isPresented: $showSettings) {
             NavigationStack {
-                SettingsView(profile: profile, settings: settings, projects: projects, assignments: assignments)
+                SettingsView(profile: profile, settings: settings, projects: projects, assignments: assignments, container: container)
             }
             .presentationDetents([.large])
         }
@@ -69,7 +70,7 @@ struct DashboardView: View {
 
                     Spacer()
 
-                    TagChip(title: settings.providerMode.rawValue, isSelected: true, icon: "bolt.horizontal.fill")
+                    TagChip(title: settings.providerMode.displayName, isSelected: true, icon: "bolt.horizontal.fill")
                 }
 
                 VStack(alignment: .leading, spacing: 10) {

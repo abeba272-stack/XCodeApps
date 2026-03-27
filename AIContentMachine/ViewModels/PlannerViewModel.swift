@@ -1,9 +1,23 @@
 import Foundation
-import SwiftData
 
 @MainActor
 final class PlannerViewModel: ObservableObject {
     @Published var selectedDate: Date = .now
+    @Published var errorMessage: String?
+
+    private let assignProjectUseCase: AssignProjectUseCase
+    private let togglePostedUseCase: TogglePostedUseCase
+    private let logger: any AppLogger
+
+    init(
+        assignProjectUseCase: AssignProjectUseCase,
+        togglePostedUseCase: TogglePostedUseCase,
+        logger: any AppLogger
+    ) {
+        self.assignProjectUseCase = assignProjectUseCase
+        self.togglePostedUseCase = togglePostedUseCase
+        self.logger = logger
+    }
 
     var weekLabel: String {
         let formatter = DateIntervalFormatter()
@@ -37,25 +51,21 @@ final class PlannerViewModel: ObservableObject {
             }
     }
 
-    func assign(project: ContentProject, to date: Date, existingAssignments: [PlannerAssignment], context: ModelContext) {
-        let assignment = PlannerService.assign(project: project, to: date, existingAssignments: existingAssignments)
-        if !existingAssignments.contains(where: { $0.id == assignment.id }) {
-            context.insert(assignment)
+    func assign(project: ContentProject, to date: Date, existingAssignments: [PlannerAssignment]) {
+        do {
+            _ = try assignProjectUseCase.execute(project: project, date: date, existingAssignments: existingAssignments)
+        } catch {
+            logger.error("Assign project failed: \(error.localizedDescription)", category: "PlannerViewModel")
+            errorMessage = AppError.from(error, fallback: "The project could not be assigned.").localizedDescription
         }
-
-        project.status = .ready
-        project.updatedAt = .now
-        assignment.status = .ready
-        assignment.projectTitle = project.title
-
-        try? context.save()
     }
 
-    func togglePosted(for assignment: PlannerAssignment, project: ContentProject?, context: ModelContext) {
-        assignment.isPosted.toggle()
-        assignment.status = assignment.isPosted ? .posted : .ready
-        project?.status = assignment.isPosted ? .posted : .ready
-        project?.updatedAt = .now
-        try? context.save()
+    func togglePosted(for assignment: PlannerAssignment, project: ContentProject?) {
+        do {
+            try togglePostedUseCase.execute(assignment: assignment, project: project)
+        } catch {
+            logger.error("Toggle posted failed: \(error.localizedDescription)", category: "PlannerViewModel")
+            errorMessage = AppError.from(error, fallback: "The posting state could not be updated.").localizedDescription
+        }
     }
 }

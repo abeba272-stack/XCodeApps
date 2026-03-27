@@ -34,4 +34,8 @@ enum ContentScoreCalculator {
         if project.platform == .instagramReels, project.caption.count <= 230 { score += 5 }
         return min(max(score, 0), 100)
     }
+
+    static func score(for session: GenerationSession) -> Int {
+        score(for: session.asContentProject())
+    }
 }

@@ -69,6 +69,14 @@
 		E2FECDEC8F6D6135E85164EE /* PlatformSelectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22E9A907E71077353511256E /* PlatformSelectionView.swift */; };
 		F1D0A74370FD156B82E426B2 /* DailyPromptProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 872B5CE98C8AAFED9D825F8F /* DailyPromptProvider.swift */; };
 		FE3DB0E9FAE4F972DB7DAEBD /* ContentLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B25E7557AFC3ABC7C3662D73 /* ContentLibraryView.swift */; };
+		AA1000000000000000000001 /* AppContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000001 /* AppContainer.swift */; };
+		AA1000000000000000000002 /* AppError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000002 /* AppError.swift */; };
+		AA1000000000000000000003 /* AppLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000003 /* AppLogger.swift */; };
+		AA1000000000000000000004 /* GenerationSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000004 /* GenerationSession.swift */; };
+		AA1000000000000000000005 /* NetworkClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000005 /* NetworkClient.swift */; };
+		AA1000000000000000000006 /* AppServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000006 /* AppServices.swift */; };
+		AA1000000000000000000007 /* AIEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000007 /* AIEngine.swift */; };
+		AA1000000000000000000008 /* DefaultAppServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000008 /* DefaultAppServices.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -116,7 +124,7 @@
 		792649E33566CFEDF2C2C360 /* ContentGeneratorViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentGeneratorViewModel.swift; sourceTree = "<group>"; };
 		7CFB28D9ECCAC65C19435F64 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
 		847FE1001866190A7AFCCFF2 /* SectionHeaderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SectionHeaderView.swift; sourceTree = "<group>"; };
-		862D699AB89BE5C677681D70 /* AIContentMachine.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = AIContentMachine.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		862D699AB89BE5C677681D70 /* AIContentMachine.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AIContentMachine.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		872B5CE98C8AAFED9D825F8F /* DailyPromptProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DailyPromptProvider.swift; sourceTree = "<group>"; };
 		885229712B441585CCC25610 /* OnboardingViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingViewModel.swift; sourceTree = "<group>"; };
 		8E0132702672EC6ECF4DC7FF /* DashboardViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardViewModel.swift; sourceTree = "<group>"; };
@@ -146,15 +154,27 @@
 		E8BE4DB0825B4AE3F9B35E86 /* BestTimeHeuristic.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BestTimeHeuristic.swift; sourceTree = "<group>"; };
 		EB5015E4DDB549E55B84AC93 /* CopyButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CopyButton.swift; sourceTree = "<group>"; };
 		FAAD3462B6A8467756619316 /* ModelContainerProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModelContainerProvider.swift; sourceTree = "<group>"; };
+		AA2000000000000000000001 /* AppContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppContainer.swift; sourceTree = "<group>"; };
+		AA2000000000000000000002 /* AppError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppError.swift; sourceTree = "<group>"; };
+		AA2000000000000000000003 /* AppLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppLogger.swift; sourceTree = "<group>"; };
+		AA2000000000000000000004 /* GenerationSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenerationSession.swift; sourceTree = "<group>"; };
+		AA2000000000000000000005 /* NetworkClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkClient.swift; sourceTree = "<group>"; };
+		AA2000000000000000000006 /* AppServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppServices.swift; sourceTree = "<group>"; };
+		AA2000000000000000000007 /* AIEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIEngine.swift; sourceTree = "<group>"; };
+		AA2000000000000000000008 /* DefaultAppServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultAppServices.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
 		03A9A31DF83B60DD9E80ED51 /* Services */ = {
 			isa = PBXGroup;
 			children = (
+				AA2000000000000000000007 /* AIEngine.swift */,
+				AA2000000000000000000006 /* AppServices.swift */,
 				349D2EA3E0D1770CEA0F6FDA /* ContentGenerationService.swift */,
 				249109F202CB8DF3AA23734F /* CopyExportService.swift */,
+				AA2000000000000000000008 /* DefaultAppServices.swift */,
 				235B1CBBC3110B7E8408905D /* MockContentGenerationService.swift */,
+				AA2000000000000000000005 /* NetworkClient.swift */,
 				D23F9165B51DB411C7A7774E /* PlannerService.swift */,
 				6EDB2951DFA411CB4ABAF9CA /* RealAIContentService.swift */,
 				D57EE94426EB4C9E70F72974 /* TemplateEngine.swift */,
@@ -208,6 +228,7 @@
 				482DC5BC426867F2E4B4D7B6 /* AppEnums.swift */,
 				2B7F1A6D0EE9841F70B9A1B5 /* AppSettings.swift */,
 				C217DB9306776DC8C8678EF4 /* ContentProject.swift */,
+				AA2000000000000000000004 /* GenerationSession.swift */,
 				2CF12D0AEF5B996D4A8B98D5 /* GenerationModels.swift */,
 				22814ECAE6CE0DB8EF66F7D1 /* PlannerAssignment.swift */,
 				A9DD9A796C5B100CEB52EADE /* TemplateModel.swift */,
@@ -262,6 +283,9 @@
 			isa = PBXGroup;
 			children = (
 				316EBEC65385D117BF637FFD /* AppBootstrapper.swift */,
+				AA2000000000000000000001 /* AppContainer.swift */,
+				AA2000000000000000000002 /* AppError.swift */,
+				AA2000000000000000000003 /* AppLogger.swift */,
 				E8BE4DB0825B4AE3F9B35E86 /* BestTimeHeuristic.swift */,
 				944FDF60B8F27B435F1093F2 /* ContentScoreCalculator.swift */,
 				872B5CE98C8AAFED9D825F8F /* DailyPromptProvider.swift */,
@@ -448,9 +472,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				AA1000000000000000000007 /* AIEngine.swift in Sources */,
 				23DD9FAFB69CB1685C8C7676 /* AIContentMachineApp.swift in Sources */,
+				AA1000000000000000000001 /* AppContainer.swift in Sources */,
 				6AB4E44BFDDCDEBE6A537778 /* AppBootstrapper.swift in Sources */,
 				7C899BB286C711C0B3B31E77 /* AppEnums.swift in Sources */,
+				AA1000000000000000000002 /* AppError.swift in Sources */,
+				AA1000000000000000000003 /* AppLogger.swift in Sources */,
+				AA1000000000000000000006 /* AppServices.swift in Sources */,
 				4C0B40F3E79AC6FC5902A65D /* AppSettings.swift in Sources */,
 				C56456F8BF45112832AFD99B /* BatchIdeasView.swift in Sources */,
 				DEA943BE5EED8095F4D0E1FE /* BestTimeHeuristic.swift in Sources */,
@@ -468,8 +497,10 @@
 				F1D0A74370FD156B82E426B2 /* DailyPromptProvider.swift in Sources */,
 				8E8D080128C489121F55338B /* DashboardView.swift in Sources */,
 				D0184DD76ABA59FCDB1C8A6F /* DashboardViewModel.swift in Sources */,
+				AA1000000000000000000008 /* DefaultAppServices.swift in Sources */,
 				40B3A9223A2A4BA8040C6D85 /* EmptyStateView.swift in Sources */,
 				918E892CAAE73477BF5AC879 /* GenerationLoadingView.swift in Sources */,
+				AA1000000000000000000004 /* GenerationSession.swift in Sources */,
 				7178F572210A7CA873B45821 /* GenerationModels.swift in Sources */,
 				5E86C6CC28F24D3849676934 /* GlassCard.swift in Sources */,
 				68138A572EA84DBFEFBCBECC /* GoalSelectionView.swift in Sources */,
@@ -477,6 +508,7 @@
 				BC5596AF0DC7712A6EA19ED7 /* MetricCard.swift in Sources */,
 				998B69D4C2D4E69D77D7E248 /* MockContentGenerationService.swift in Sources */,
 				114D011D2ECFE18DC1D6C00B /* ModelContainerProvider.swift in Sources */,
+				AA1000000000000000000005 /* NetworkClient.swift in Sources */,
 				8D1395C8701A2DEC87D04234 /* NicheSelectionView.swift in Sources */,
 				5C04658ABC244769C375AA39 /* OnboardingContainerView.swift in Sources */,
 				2D0F71206A2587E11487639C /* OnboardingViewModel.swift in Sources */,
@@ -536,6 +568,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = HJJUF8PG32;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI Content Machine";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";
@@ -624,6 +657,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				DEVELOPMENT_TEAM = HJJUF8PG32;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_KEY_CFBundleDisplayName = "AI Content Machine";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.productivity";

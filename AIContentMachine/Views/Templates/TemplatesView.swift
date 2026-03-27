@@ -7,6 +7,7 @@ struct TemplatesView: View {
     @Query private var settings: [AppSettings]
 
     let templates: [TemplateModel]
+    let container: AppContainer
 
     @StateObject private var viewModel = TemplatesViewModel()
 
@@ -57,7 +58,7 @@ struct TemplatesView: View {
 
                             if let profile = profiles.first, let settings = settings.first {
                                 NavigationLink {
-                                    CreateContentView(profile: profile, settings: settings, templates: templates, initialTemplate: template)
+                                    CreateContentView(profile: profile, settings: settings, templates: templates, container: container, initialTemplate: template)
                                 } label: {
                                     Text("Use Template")
                                 }

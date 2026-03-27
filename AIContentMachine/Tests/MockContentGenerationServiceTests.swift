@@ -28,6 +28,27 @@ final class MockContentGenerationServiceTests: XCTestCase {
         XCTAssertGreaterThanOrEqual(content.hashtags.count, 4)
         XCTAssertGreaterThanOrEqual(content.shotList.count, 4)
         XCTAssertGreaterThan(content.score, 0)
+
+        let project = ContentProject.from(request: request, generated: content)
+        let videoPrompt = CopyExportService.videoPromptText(for: project)
+        XCTAssertFalse(videoPrompt.isEmpty)
+
+        [
+            "[HOOK_VISUAL]",
+            "[SCENE]",
+            "[CAMERA]",
+            "[MOTION]",
+            "[STYLE]",
+            "[LIGHTING]",
+            "[SOUND]",
+            "[DURATION]"
+        ]
+        .forEach { section in
+            XCTAssertTrue(videoPrompt.contains(section), "Expected video prompt to contain \(section)")
+        }
+
+        XCTAssertTrue(videoPrompt.contains("3-5 seconds"))
+        XCTAssertTrue(videoPrompt.localizedCaseInsensitiveContains("creators") || videoPrompt.localizedCaseInsensitiveContains("burn out"))
     }
 
     func testBatchGenerationCreatesTenIdeas() async throws {

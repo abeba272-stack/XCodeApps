@@ -1,20 +1,22 @@
 import SwiftUI
-import SwiftData
 
 struct ContentResultView: View {
-    @Environment(\.modelContext) private var modelContext
     @ObservedObject var viewModel: ContentGeneratorViewModel
-    @Bindable var project: ContentProject
+    @Bindable var session: GenerationSession
     let settings: AppSettings
 
     @State private var selectedSection: ContentSection = .overview
     @State private var isEditing = false
 
     private var scriptLines: [String] {
-        project.script
+        session.script
             .split(separator: "\n")
             .map(String.init)
             .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+    }
+
+    private var videoPrompt: String {
+        viewModel.videoPromptText(for: session)
     }
 
     var body: some View {
@@ -22,6 +24,9 @@ struct ContentResultView: View {
             VStack(alignment: .leading, spacing: 18) {
                 heroCard
                 snapshotCard
+                if !videoPrompt.isEmpty {
+                    videoPromptCard
+                }
                 sectionPicker
                 contentSectionCard
                 insightsCard
@@ -32,18 +37,15 @@ struct ContentResultView: View {
         }
         .navigationTitle("Result")
         .navigationBarTitleDisplayMode(.inline)
-        .onAppear {
-            keepSelectedSectionValid()
-        }
-        .onChange(of: project.generationMode) { _, _ in keepSelectedSectionValid() }
-        .onChange(of: project.updatedAt) { _, _ in keepSelectedSectionValid() }
+        .onAppear(perform: keepSelectedSectionValid)
+        .onChange(of: session.generationMode) { _, _ in keepSelectedSectionValid() }
+        .onChange(of: session.updatedAt) { _, _ in keepSelectedSectionValid() }
         .toolbar {
             ToolbarItemGroup(placement: .topBarTrailing) {
                 Button {
-                    project.isFavorite.toggle()
-                    try? modelContext.save()
+                    viewModel.toggleFavorite()
                 } label: {
-                    Image(systemName: project.isFavorite ? "star.fill" : "star")
+                    Image(systemName: session.isFavorite ? "star.fill" : "star")
                 }
 
                 Button {
@@ -84,38 +86,38 @@ struct ContentResultView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack(spacing: 10) {
                             Circle()
-                                .fill(Color(hex: project.platform.accentStartHex).opacity(0.18))
+                                .fill(Color(hex: session.platform.accentStartHex).opacity(0.18))
                                 .frame(width: 42, height: 42)
                                 .overlay {
-                                    Image(systemName: project.platform.icon)
+                                    Image(systemName: session.platform.icon)
                                         .font(.system(size: 17, weight: .bold))
-                                        .foregroundStyle(Color(hex: project.platform.accentStartHex))
+                                        .foregroundStyle(Color(hex: session.platform.accentStartHex))
                                 }
 
                             VStack(alignment: .leading, spacing: 4) {
-                                Text(project.title)
+                                Text(session.title)
                                     .font(.system(size: 29, weight: .bold, design: .rounded))
                                     .foregroundStyle(AppTheme.textPrimary)
-                                Text("\(project.platform.rawValue) • \(project.category) • \(project.durationLabel)")
+                                Text("\(session.platform.rawValue) • \(session.category) • \(session.durationLabel)")
                                     .font(.system(size: 13, weight: .semibold, design: .rounded))
                                     .foregroundStyle(AppTheme.textSecondary)
                             }
                         }
 
-                        Text(project.contentAngle.isEmpty ? project.overview : project.contentAngle)
+                        Text(session.contentAngle.isEmpty ? session.overview : session.contentAngle)
                             .font(.system(size: 15, weight: .medium, design: .rounded))
                             .foregroundStyle(AppTheme.textSecondary)
                     }
 
                     Spacer()
 
-                    StatusBadge(status: project.status)
+                    StatusBadge(status: session.status)
                 }
 
                 HStack(spacing: 10) {
-                    metricPill(title: "Score", value: "\(project.contentScore)", accent: AppTheme.accentGlow)
-                    metricPill(title: "Goal", value: project.goal.rawValue, accent: AppTheme.success)
-                    metricPill(title: "Tone", value: project.tone.rawValue, accent: AppTheme.accentSecondary)
+                    metricPill(title: "Score", value: "\(session.contentScore)", accent: AppTheme.accentGlow)
+                    metricPill(title: "Goal", value: session.goal.rawValue, accent: AppTheme.success)
+                    metricPill(title: "Tone", value: session.tone.rawValue, accent: AppTheme.accentSecondary)
                 }
             }
         }
@@ -131,10 +133,10 @@ struct ContentResultView: View {
                 )
 
                 VStack(spacing: 12) {
-                    snapshotRow(label: "Audience", value: project.audienceSummary.isEmpty ? project.audience : project.audienceSummary)
-                    snapshotRow(label: "Best time", value: project.bestPostingTime.isEmpty ? "Local heuristic available in full packages." : project.bestPostingTime)
-                    snapshotRow(label: "Trigger", value: project.emotionalTrigger.isEmpty ? "Tension and clarity are balanced for the selected platform." : project.emotionalTrigger)
-                    if let templateUsed = project.templateUsed, !templateUsed.isEmpty {
+                    snapshotRow(label: "Audience", value: session.audienceSummary.isEmpty ? session.audience : session.audienceSummary)
+                    snapshotRow(label: "Best time", value: session.bestPostingTime.isEmpty ? "Local heuristic available in full packages." : session.bestPostingTime)
+                    snapshotRow(label: "Trigger", value: session.emotionalTrigger.isEmpty ? "Tension and clarity are balanced for the selected platform." : session.emotionalTrigger)
+                    if let templateUsed = session.templateUsed, !templateUsed.isEmpty {
                         snapshotRow(label: "Template", value: templateUsed)
                     }
                 }
@@ -158,6 +160,44 @@ struct ContentResultView: View {
             RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous)
                 .stroke(AppTheme.border, lineWidth: 1)
         )
+    }
+
+    private var videoPromptCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 16) {
+                SectionHeaderView(
+                    title: "Video AI Prompt",
+                    subtitle: "Copy this modular short-form prompt directly into Veo, Sora, Runway, Kling, Pika, or another video generator.",
+                    eyebrow: "Production"
+                )
+
+                ScrollView {
+                    Text(videoPrompt)
+                        .font(.system(size: 13, weight: .medium, design: .monospaced))
+                        .foregroundStyle(AppTheme.textPrimary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .textSelection(.enabled)
+                }
+                .frame(minHeight: 240, maxHeight: 320)
+                .padding(14)
+                .background(AppTheme.surfaceSecondary, in: RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous)
+                        .stroke(AppTheme.border, lineWidth: 1)
+                )
+
+                HStack(spacing: 10) {
+                    Button("Copy Video Prompt") {
+                        viewModel.copyVideoPrompt()
+                    }
+                    .buttonStyle(AppPrimaryButtonStyle())
+
+                    CopyButton(title: "Copy Full Package") {
+                        viewModel.copyFullPackage()
+                    }
+                }
+            }
+        }
     }
 
     private func metricPill(title: String, value: String, accent: Color) -> some View {
@@ -227,7 +267,9 @@ struct ContentResultView: View {
                     }
 
                     Button(isEditing ? "Done Editing" : "Edit Manually") {
-                        withAnimation(.smooth) { isEditing.toggle() }
+                        withAnimation(.smooth) {
+                            isEditing.toggle()
+                        }
                     }
                     .buttonStyle(AppQuietButtonStyle())
                 }
@@ -239,19 +281,19 @@ struct ContentResultView: View {
     private var readOnlySection: some View {
         switch selectedSection {
         case .overview:
-            Text(project.overview)
+            Text(session.overview)
                 .font(.system(size: 15, weight: .medium, design: .rounded))
                 .foregroundStyle(AppTheme.textPrimary)
                 .frame(maxWidth: .infinity, alignment: .leading)
 
         case .hook:
             VStack(alignment: .leading, spacing: 14) {
-                hookCard(text: project.hook, title: "Primary hook")
-                if !project.alternateHooks.isEmpty {
+                hookCard(text: session.hook, title: "Primary hook")
+                if !session.alternateHooks.isEmpty {
                     Text("Alternate hooks")
                         .font(.system(size: 13, weight: .bold, design: .rounded))
                         .foregroundStyle(AppTheme.textPrimary)
-                    ForEach(project.alternateHooks, id: \.self) { alt in
+                    ForEach(session.alternateHooks, id: \.self) { alt in
                         hookCard(text: alt, title: nil)
                     }
                 }
@@ -279,12 +321,12 @@ struct ContentResultView: View {
                     }
                 }
 
-                if !project.voiceover.isEmpty {
+                if !session.voiceover.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Voiceover")
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundStyle(AppTheme.textPrimary)
-                        Text(project.voiceover)
+                        Text(session.voiceover)
                             .font(.system(size: 14, weight: .medium, design: .rounded))
                             .foregroundStyle(AppTheme.textSecondary)
                     }
@@ -298,35 +340,17 @@ struct ContentResultView: View {
             }
 
         case .caption:
-            Text(project.caption)
-                .font(.system(size: 15, weight: .medium, design: .rounded))
-                .foregroundStyle(AppTheme.textPrimary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(16)
-                .background(AppTheme.surfaceSecondary, in: RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous)
-                        .stroke(AppTheme.border, lineWidth: 1)
-                )
+            sectionTextBlock(session.caption, prominent: false)
 
         case .hashtags:
-            FlowLayout(items: project.hashtags)
+            FlowLayout(items: session.hashtags)
 
         case .cta:
-            Text(project.cta)
-                .font(.system(size: 18, weight: .bold, design: .rounded))
-                .foregroundStyle(AppTheme.textPrimary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(16)
-                .background(AppTheme.surfaceSecondary, in: RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous)
-                        .stroke(AppTheme.border, lineWidth: 1)
-                )
+            sectionTextBlock(session.cta, prominent: true)
 
         case .shotList:
             VStack(alignment: .leading, spacing: 10) {
-                ForEach(Array(project.shotList.enumerated()), id: \.offset) { index, shot in
+                ForEach(Array(session.shotList.enumerated()), id: \.offset) { index, shot in
                     HStack(alignment: .top, spacing: 12) {
                         Text("\(index + 1)")
                             .font(.system(size: 12, weight: .heavy, design: .rounded))
@@ -346,7 +370,7 @@ struct ContentResultView: View {
             }
 
         case .notes:
-            Text(project.notes)
+            Text(session.notes)
                 .font(.system(size: 14, weight: .medium, design: .rounded))
                 .foregroundStyle(AppTheme.textSecondary)
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -357,43 +381,43 @@ struct ContentResultView: View {
     private var editableSection: some View {
         switch selectedSection {
         case .overview:
-            editorContainer(text: $project.overview, minHeight: 130)
+            editorContainer(text: $session.overview, minHeight: 130)
         case .hook:
             editorContainer(
                 text: Binding(
-                    get: { ([project.hook] + project.alternateHooks).joined(separator: "\n") },
+                    get: { ([session.hook] + session.alternateHooks).joined(separator: "\n") },
                     set: { value in
                         let parts = value.split(separator: "\n").map(String.init)
-                        project.hook = parts.first ?? ""
-                        project.alternateHooks = Array(parts.dropFirst())
+                        session.hook = parts.first ?? ""
+                        session.alternateHooks = Array(parts.dropFirst())
                     }
                 ),
                 minHeight: 150
             )
         case .script:
-            editorContainer(text: $project.script, minHeight: 200)
+            editorContainer(text: $session.script, minHeight: 200)
         case .caption:
-            editorContainer(text: $project.caption, minHeight: 160)
+            editorContainer(text: $session.caption, minHeight: 160)
         case .hashtags:
             editorContainer(
                 text: Binding(
-                    get: { project.hashtags.joined(separator: " ") },
-                    set: { project.hashtags = $0.split(separator: " ").map(String.init) }
+                    get: { session.hashtags.joined(separator: " ") },
+                    set: { session.hashtags = $0.split(separator: " ").map(String.init) }
                 ),
                 minHeight: 120
             )
         case .cta:
-            editorContainer(text: $project.cta, minHeight: 100)
+            editorContainer(text: $session.cta, minHeight: 100)
         case .shotList:
             editorContainer(
                 text: Binding(
-                    get: { project.shotList.joined(separator: "\n") },
-                    set: { project.shotList = $0.split(separator: "\n").map(String.init) }
+                    get: { session.shotList.joined(separator: "\n") },
+                    set: { session.shotList = $0.split(separator: "\n").map(String.init) }
                 ),
                 minHeight: 160
             )
         case .notes:
-            editorContainer(text: $project.notes, minHeight: 120)
+            editorContainer(text: $session.notes, minHeight: 120)
         }
     }
 
@@ -430,38 +454,51 @@ struct ContentResultView: View {
         )
     }
 
+    private func sectionTextBlock(_ text: String, prominent: Bool) -> some View {
+        Text(text)
+            .font(.system(size: prominent ? 18 : 15, weight: prominent ? .bold : .medium, design: .rounded))
+            .foregroundStyle(AppTheme.textPrimary)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(16)
+            .background(AppTheme.surfaceSecondary, in: RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous)
+                    .stroke(AppTheme.border, lineWidth: 1)
+            )
+    }
+
     private var insightsCard: some View {
         GlassCard {
             VStack(alignment: .leading, spacing: 14) {
                 SectionHeaderView(
                     title: "Why this may perform",
-                    subtitle: project.bestPostingTime.isEmpty ? "Local performance heuristics" : "Best time: \(project.bestPostingTime)",
+                    subtitle: session.bestPostingTime.isEmpty ? "Local performance heuristics" : "Best time: \(session.bestPostingTime)",
                     eyebrow: "Insights"
                 )
 
-                Text(project.performanceRationale.isEmpty ? "This result is optimized as a lightweight idea draft." : project.performanceRationale)
+                Text(session.performanceRationale.isEmpty ? "This result is optimized as a lightweight idea draft." : session.performanceRationale)
                     .font(.system(size: 14, weight: .medium, design: .rounded))
                     .foregroundStyle(AppTheme.textSecondary)
 
-                if !project.postingTip.isEmpty {
-                    snapshotRow(label: "Posting tip", value: project.postingTip)
+                if !session.postingTip.isEmpty {
+                    snapshotRow(label: "Posting tip", value: session.postingTip)
                 }
 
-                if !project.thumbnailSuggestions.isEmpty {
+                if !session.thumbnailSuggestions.isEmpty {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Thumbnail / cover text")
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundStyle(AppTheme.textPrimary)
-                        FlowLayout(items: project.thumbnailSuggestions)
+                        FlowLayout(items: session.thumbnailSuggestions)
                     }
                 }
 
-                if !project.postingChecklist.isEmpty {
+                if !session.postingChecklist.isEmpty {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Posting checklist")
                             .font(.system(size: 13, weight: .bold, design: .rounded))
                             .foregroundStyle(AppTheme.textPrimary)
-                        ForEach(Array(project.postingChecklist.enumerated()), id: \.offset) { index, item in
+                        ForEach(Array(session.postingChecklist.enumerated()), id: \.offset) { _, item in
                             HStack(alignment: .top, spacing: 12) {
                                 Image(systemName: "checkmark.circle.fill")
                                     .font(.system(size: 14))
@@ -488,7 +525,7 @@ struct ContentResultView: View {
 
                 HStack(spacing: 10) {
                     Button("Save Draft") {
-                        viewModel.saveDraft(context: modelContext)
+                        viewModel.saveDraft()
                     }
                     .buttonStyle(AppPrimaryButtonStyle())
 
@@ -500,7 +537,7 @@ struct ContentResultView: View {
 
                 HStack(spacing: 10) {
                     Button("Duplicate") {
-                        viewModel.duplicate(context: modelContext)
+                        viewModel.duplicate()
                     }
                     .buttonStyle(AppSecondaryButtonStyle())
 
@@ -554,7 +591,7 @@ struct ContentResultView: View {
     }
 
     private var availableSections: [ContentSection] {
-        switch project.generationMode {
+        switch session.generationMode {
         case .singleIdea:
             return [.overview, .hook, .cta, .notes]
         case .batchIdeas:
@@ -563,21 +600,21 @@ struct ContentResultView: View {
             return ContentSection.allCases.filter { section in
                 switch section {
                 case .overview:
-                    return !project.overview.isEmpty
+                    return !session.overview.isEmpty
                 case .hook:
-                    return !project.hook.isEmpty
+                    return !session.hook.isEmpty
                 case .script:
-                    return !project.script.isEmpty || !project.voiceover.isEmpty
+                    return !session.script.isEmpty || !session.voiceover.isEmpty
                 case .caption:
-                    return !project.caption.isEmpty
+                    return !session.caption.isEmpty
                 case .hashtags:
-                    return !project.hashtags.isEmpty
+                    return !session.hashtags.isEmpty
                 case .cta:
-                    return !project.cta.isEmpty
+                    return !session.cta.isEmpty
                 case .shotList:
-                    return !project.shotList.isEmpty
+                    return !session.shotList.isEmpty
                 case .notes:
-                    return !project.notes.isEmpty
+                    return !session.notes.isEmpty
                 }
             }
         }

@@ -1,15 +1,22 @@
 import SwiftUI
-import SwiftData
 
 struct CreateContentView: View {
-    @Environment(\.modelContext) private var modelContext
-
     let profile: UserProfile
     let settings: AppSettings
     let templates: [TemplateModel]
+    let container: AppContainer
     var initialTemplate: TemplateModel? = nil
 
-    @StateObject private var viewModel = ContentGeneratorViewModel()
+    @StateObject private var viewModel: ContentGeneratorViewModel
+
+    init(profile: UserProfile, settings: AppSettings, templates: [TemplateModel], container: AppContainer, initialTemplate: TemplateModel? = nil) {
+        self.profile = profile
+        self.settings = settings
+        self.templates = templates
+        self.container = container
+        self.initialTemplate = initialTemplate
+        _viewModel = StateObject(wrappedValue: container.makeContentGeneratorViewModel())
+    }
 
     private var canGenerate: Bool {
         !viewModel.topic.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -51,14 +58,14 @@ struct CreateContentView: View {
             }
         }
         .navigationDestination(isPresented: Binding(
-            get: { viewModel.previewProject != nil },
-            set: { if !$0 { viewModel.previewProject = nil } }
+            get: { viewModel.session != nil },
+            set: { if !$0 { viewModel.session = nil } }
         )) {
-            if let project = viewModel.previewProject {
-                if project.generationMode == .batchIdeas {
-                    BatchIdeasView(viewModel: viewModel, project: project)
+            if let session = viewModel.session {
+                if session.generationMode == .batchIdeas {
+                    BatchIdeasView(viewModel: viewModel, session: session)
                 } else {
-                    ContentResultView(viewModel: viewModel, project: project, settings: settings)
+                    ContentResultView(viewModel: viewModel, session: session, settings: settings)
                 }
             }
         }
@@ -83,7 +90,7 @@ struct CreateContentView: View {
                             .foregroundStyle(AppTheme.textSecondary)
                     }
                     Spacer()
-                    TagChip(title: settings.providerMode.rawValue, isSelected: true, icon: "bolt.horizontal.fill")
+                    TagChip(title: settings.providerMode.displayName, isSelected: true, icon: "bolt.horizontal.fill")
                 }
 
                 HStack(spacing: 10) {

@@ -1,15 +1,23 @@
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct ContentDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Bindable var project: ContentProject
+
+    private var videoPrompt: String {
+        CopyExportService.videoPromptText(for: project)
+    }
 
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
                 heroCard
                 projectCard
+                if !videoPrompt.isEmpty {
+                    videoPromptCard
+                }
                 coreCopyCard
                 scriptCard
                 listCard
@@ -27,6 +35,43 @@ struct ContentDetailView: View {
                     try? modelContext.save()
                 }
                 .buttonStyle(AppQuietButtonStyle())
+            }
+        }
+    }
+
+    private var videoPromptCard: some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 14) {
+                SectionHeaderView(
+                    title: "Video AI Prompt",
+                    subtitle: "Built from this saved project as a modular short-form prompt for realistic video generators.",
+                    eyebrow: "Production"
+                )
+
+                ScrollView {
+                    Text(videoPrompt)
+                        .font(.system(size: 13, weight: .medium, design: .monospaced))
+                        .foregroundStyle(AppTheme.textPrimary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .textSelection(.enabled)
+                }
+                .frame(minHeight: 220, maxHeight: 320)
+                .padding(14)
+                .background(AppTheme.surfaceSecondary, in: RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: AppTheme.radiusSmall, style: .continuous)
+                        .stroke(AppTheme.border, lineWidth: 1)
+                )
+
+                HStack(spacing: 10) {
+                    CopyButton(title: "Copy Prompt") {
+                        UIPasteboard.general.string = videoPrompt
+                    }
+
+                    CopyButton(title: "Copy Full Package") {
+                        UIPasteboard.general.string = CopyExportService.formattedPackage(for: project)
+                    }
+                }
             }
         }
     }

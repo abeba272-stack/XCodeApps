@@ -1,10 +1,8 @@
 import SwiftUI
-import SwiftData
 
 struct BatchIdeasView: View {
-    @Environment(\.modelContext) private var modelContext
     @ObservedObject var viewModel: ContentGeneratorViewModel
-    @Bindable var project: ContentProject
+    @Bindable var session: GenerationSession
 
     var body: some View {
         ScrollView {
@@ -31,21 +29,21 @@ struct BatchIdeasView: View {
             VStack(alignment: .leading, spacing: 16) {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text(project.title)
+                        Text(session.title)
                             .font(.system(size: 29, weight: .bold, design: .rounded))
                             .foregroundStyle(AppTheme.textPrimary)
-                        Text(project.overview)
+                        Text(session.overview)
                             .font(.system(size: 15, weight: .medium, design: .rounded))
                             .foregroundStyle(AppTheme.textSecondary)
                     }
                     Spacer()
-                    StatusBadge(status: project.status)
+                    StatusBadge(status: session.status)
                 }
 
                 HStack(spacing: 10) {
-                    TagChip(title: project.platform.rawValue, icon: project.platform.icon)
-                    TagChip(title: "Score \(project.contentScore)", isSelected: project.contentScore >= 80, icon: "sparkles")
-                    TagChip(title: project.goal.rawValue, icon: "target")
+                    TagChip(title: session.platform.rawValue, icon: session.platform.icon)
+                    TagChip(title: "Score \(session.contentScore)", isSelected: session.contentScore >= 80, icon: "sparkles")
+                    TagChip(title: session.goal.rawValue, icon: "target")
                 }
             }
         }
@@ -56,11 +54,11 @@ struct BatchIdeasView: View {
             VStack(alignment: .leading, spacing: 14) {
                 SectionHeaderView(
                     title: "10 strong ideas",
-                    subtitle: "Built for \(project.platform.rawValue) with reusable creator angles.",
+                    subtitle: "Built for \(session.platform.rawValue) with reusable creator angles.",
                     eyebrow: "Batch"
                 )
 
-                ForEach(Array(project.batchIdeas.enumerated()), id: \.offset) { index, idea in
+                ForEach(Array(session.batchIdeas.enumerated()), id: \.offset) { index, idea in
                     HStack(alignment: .top, spacing: 12) {
                         Text("\(index + 1)")
                             .font(.system(size: 13, weight: .heavy, design: .rounded))
@@ -92,7 +90,7 @@ struct BatchIdeasView: View {
                 )
 
                 Button("Save Draft") {
-                    viewModel.saveDraft(context: modelContext)
+                    viewModel.saveDraft()
                 }
                 .buttonStyle(AppPrimaryButtonStyle())
 

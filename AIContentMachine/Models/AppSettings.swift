@@ -3,6 +3,8 @@ import SwiftData
 
 @Model
 final class AppSettings {
+    static let defaultLocalServerEndpoint = "http://192.168.1.23:3000/chat"
+
     @Attribute(.unique) var id: UUID
     var themeRaw: String
     var providerModeRaw: String
@@ -41,11 +43,26 @@ extension AppSettings {
         set { providerModeRaw = newValue.rawValue }
     }
 
+    var localServerEndpoint: String {
+        get {
+            let trimmed = apiEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? Self.defaultLocalServerEndpoint : trimmed
+        }
+        set {
+            let trimmed = newValue.trimmingCharacters(in: .whitespacesAndNewlines)
+            apiEndpoint = trimmed.isEmpty ? Self.defaultLocalServerEndpoint : trimmed
+        }
+    }
+
+    var localServerURL: URL? {
+        URL(string: localServerEndpoint)
+    }
+
     var snapshot: AppSettingsSnapshot {
         AppSettingsSnapshot(
             theme: themeRaw,
             providerMode: providerModeRaw,
-            apiEndpoint: apiEndpoint,
+            apiEndpoint: localServerEndpoint,
             apiModel: apiModel
         )
     }

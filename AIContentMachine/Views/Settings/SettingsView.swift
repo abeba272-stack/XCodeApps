@@ -10,8 +10,24 @@ struct SettingsView: View {
     let settings: AppSettings
     let projects: [ContentProject]
     let assignments: [PlannerAssignment]
+    let container: AppContainer
 
-    @StateObject private var viewModel = SettingsViewModel()
+    @StateObject private var viewModel: SettingsViewModel
+
+    init(
+        profile: UserProfile,
+        settings: AppSettings,
+        projects: [ContentProject],
+        assignments: [PlannerAssignment],
+        container: AppContainer
+    ) {
+        self.profile = profile
+        self.settings = settings
+        self.projects = projects
+        self.assignments = assignments
+        self.container = container
+        _viewModel = StateObject(wrappedValue: container.makeSettingsViewModel())
+    }
 
     var body: some View {
         Form {
@@ -67,21 +83,25 @@ struct SettingsView: View {
             Section("AI Provider") {
                 Picker("Provider mode", selection: $viewModel.providerMode) {
                     ForEach(AIProviderMode.allCases) { mode in
-                        Text(mode.rawValue).tag(mode)
+                        Text(mode.displayName).tag(mode)
                     }
                 }
 
-                SecureField("API key", text: $viewModel.apiKey)
-                TextField("Endpoint URL", text: $viewModel.apiEndpoint)
-                    .keyboardType(.URL)
-                    .textInputAutocapitalization(.never)
-                TextField("Model ID", text: $viewModel.apiModel)
-                    .textInputAutocapitalization(.never)
+                Text(viewModel.providerMode.subtitle)
+                    .font(.footnote)
+                    .foregroundStyle(AppTheme.textSecondary)
+
+                if viewModel.providerMode.requiresEndpoint {
+                    TextField("Local server endpoint", text: $viewModel.localServerEndpoint)
+                        .keyboardType(.URL)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                }
             }
 
             Section("Data") {
                 Button("Save Settings") {
-                    viewModel.save(profile: profile, settings: settings, context: modelContext)
+                    viewModel.save(profile: profile, settings: settings)
                     themeManager.preference = viewModel.theme
                 }
                 Button("Export Data") {
@@ -93,10 +113,10 @@ struct SettingsView: View {
                     }
                 }
                 Button("Clear Local Data", role: .destructive) {
-                    viewModel.clearLocalData(projects: projects, assignments: assignments, context: modelContext)
+                    viewModel.clearLocalData(projects: projects, assignments: assignments)
                 }
                 Button("Reset Onboarding", role: .destructive) {
-                    viewModel.resetOnboarding(profile: profile, context: modelContext)
+                    viewModel.resetOnboarding(profile: profile)
                     dismiss()
                 }
             }

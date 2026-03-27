@@ -179,6 +179,28 @@ enum AIProviderMode: String, CaseIterable, Codable, Identifiable {
     case customEndpoint = "Custom Endpoint"
 
     var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .mock:
+            return "Offline Mock"
+        case .customEndpoint:
+            return "Local AI Server"
+        }
+    }
+
+    var subtitle: String {
+        switch self {
+        case .mock:
+            return "Fully local heuristics with no server dependency."
+        case .customEndpoint:
+            return "Use your local network AI server for generation."
+        }
+    }
+
+    var requiresEndpoint: Bool {
+        self == .customEndpoint
+    }
 }
 
 enum ContentSection: String, CaseIterable, Identifiable {

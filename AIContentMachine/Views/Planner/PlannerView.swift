@@ -1,13 +1,19 @@
 import SwiftUI
-import SwiftData
 
 struct PlannerView: View {
-    @Environment(\.modelContext) private var modelContext
     let projects: [ContentProject]
     let assignments: [PlannerAssignment]
+    let container: AppContainer
 
-    @StateObject private var viewModel = PlannerViewModel()
+    @StateObject private var viewModel: PlannerViewModel
     @State private var selectedPlannerDate: Date?
+
+    init(projects: [ContentProject], assignments: [PlannerAssignment], container: AppContainer) {
+        self.projects = projects
+        self.assignments = assignments
+        self.container = container
+        _viewModel = StateObject(wrappedValue: container.makePlannerViewModel())
+    }
 
     private var weekDays: [PlannerDay] {
         viewModel.days(assignments: assignments)
@@ -42,11 +48,21 @@ struct PlannerView: View {
                     date: item.date,
                     projects: projects.filter { $0.status != .posted && $0.status != .archived }
                 ) { project in
-                    viewModel.assign(project: project, to: item.date, existingAssignments: assignments, context: modelContext)
+                    viewModel.assign(project: project, to: item.date, existingAssignments: assignments)
                     selectedPlannerDate = nil
                 }
             }
             .presentationDetents([.medium, .large])
+        }
+        .alert("Planner", isPresented: Binding(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.errorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) {
+                viewModel.errorMessage = nil
+            }
+        } message: {
+            Text(viewModel.errorMessage ?? "")
         }
     }
 
@@ -208,12 +224,12 @@ struct PlannerView: View {
                             HStack(spacing: 10) {
                                 if assignment.isPosted {
                                     Button("Posted") {
-                                        viewModel.togglePosted(for: assignment, project: linkedProject, context: modelContext)
+                                        viewModel.togglePosted(for: assignment, project: linkedProject)
                                     }
                                     .buttonStyle(AppQuietButtonStyle())
                                 } else {
                                     Button("Mark Posted") {
-                                        viewModel.togglePosted(for: assignment, project: linkedProject, context: modelContext)
+                                        viewModel.togglePosted(for: assignment, project: linkedProject)
                                     }
                                     .buttonStyle(AppSecondaryButtonStyle())
                                 }
@@ -278,7 +294,7 @@ struct PlannerView: View {
 
                             Button("Add") {
                                 let targetDate = selectedDay?.date ?? viewModel.selectedDate
-                                viewModel.assign(project: project, to: targetDate, existingAssignments: assignments, context: modelContext)
+                                viewModel.assign(project: project, to: targetDate, existingAssignments: assignments)
                             }
                             .buttonStyle(AppQuietButtonStyle())
                         }

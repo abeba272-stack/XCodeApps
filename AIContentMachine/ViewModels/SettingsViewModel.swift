@@ -12,26 +12,43 @@ final class SettingsViewModel: ObservableObject {
     @Published var postingFrequency: Double = 4
     @Published var theme: AppThemePreference = .dark
     @Published var providerMode: AIProviderMode = .mock
-    @Published var apiKey: String = ""
-    @Published var apiEndpoint: String = ""
-    @Published var apiModel: String = "content-engine-v1"
+    @Published var localServerEndpoint: String = AppSettings.defaultLocalServerEndpoint
     @Published var shareItems: [Any] = []
     @Published var errorMessage: String?
     @Published var toastMessage: String?
 
+    private let settingsService: any SettingsService
+    private let updateSettingsUseCase: UpdateSettingsUseCase
+    private let exportWorkspaceUseCase: ExportWorkspaceUseCase
+    private let persistenceService: any PersistenceService
+    private let logger: any AppLogger
+
+    init(
+        settingsService: any SettingsService,
+        updateSettingsUseCase: UpdateSettingsUseCase,
+        exportWorkspaceUseCase: ExportWorkspaceUseCase,
+        persistenceService: any PersistenceService,
+        logger: any AppLogger
+    ) {
+        self.settingsService = settingsService
+        self.updateSettingsUseCase = updateSettingsUseCase
+        self.exportWorkspaceUseCase = exportWorkspaceUseCase
+        self.persistenceService = persistenceService
+        self.logger = logger
+    }
+
     func load(profile: UserProfile, settings: AppSettings) {
-        creatorName = profile.creatorName
-        nichesText = profile.selectedNiches.joined(separator: ", ")
-        selectedPlatforms = Set(profile.preferredPlatformEnums)
-        selectedLanguage = profile.preferredLanguage
-        selectedTone = profile.preferredTone
-        selectedGoals = Set(profile.goalEnums)
-        postingFrequency = Double(profile.postingFrequency)
-        theme = settings.theme
-        providerMode = settings.providerMode
-        apiKey = settings.apiKey
-        apiEndpoint = settings.apiEndpoint
-        apiModel = settings.apiModel
+        let draft = settingsService.loadDraft(profile: profile, settings: settings)
+        creatorName = draft.creatorName
+        nichesText = draft.nichesText
+        selectedPlatforms = draft.selectedPlatforms
+        selectedLanguage = draft.selectedLanguage
+        selectedTone = draft.selectedTone
+        selectedGoals = draft.selectedGoals
+        postingFrequency = draft.postingFrequency
+        theme = draft.theme
+        providerMode = draft.providerMode
+        localServerEndpoint = draft.localServerEndpoint
     }
 
     func toggle(platform: ContentPlatform) {
@@ -50,59 +67,56 @@ final class SettingsViewModel: ObservableObject {
         }
     }
 
-    func save(profile: UserProfile, settings: AppSettings, context: ModelContext) {
-        profile.creatorName = creatorName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "Creator" : creatorName
-        profile.selectedNiches = nichesText
-            .split(separator: ",")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-        profile.preferredPlatforms = selectedPlatforms.map(\.rawValue).sorted()
-        profile.preferredLanguage = selectedLanguage
-        profile.preferredTone = selectedTone
-        profile.goals = selectedGoals.map(\.rawValue).sorted()
-        profile.postingFrequency = Int(postingFrequency)
-
-        settings.theme = theme
-        settings.providerMode = providerMode
-        settings.apiKey = apiKey
-        settings.apiEndpoint = apiEndpoint
-        settings.apiModel = apiModel
+    func save(profile: UserProfile, settings: AppSettings) {
+        let draft = SettingsDraft(
+            creatorName: creatorName,
+            nichesText: nichesText,
+            selectedPlatforms: selectedPlatforms,
+            selectedLanguage: selectedLanguage,
+            selectedTone: selectedTone,
+            selectedGoals: selectedGoals,
+            postingFrequency: postingFrequency,
+            theme: theme,
+            providerMode: providerMode,
+            localServerEndpoint: localServerEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
+        )
 
         do {
-            try context.save()
+            try updateSettingsUseCase.execute(profile: profile, settings: settings, draft: draft)
             toastMessage = "Settings saved"
         } catch {
-            errorMessage = error.localizedDescription
+            logger.error("Save settings failed: \(error.localizedDescription)", category: "SettingsViewModel")
+            errorMessage = AppError.from(error, fallback: "Settings could not be saved.").localizedDescription
         }
     }
 
-    func clearLocalData(projects: [ContentProject], assignments: [PlannerAssignment], context: ModelContext) {
-        projects.forEach(context.delete)
-        assignments.forEach(context.delete)
+    func clearLocalData(projects: [ContentProject], assignments: [PlannerAssignment]) {
         do {
-            try context.save()
+            try persistenceService.clearLocalData(projects: projects, assignments: assignments)
             toastMessage = "Local projects cleared"
         } catch {
-            errorMessage = error.localizedDescription
+            logger.error("Clear local data failed: \(error.localizedDescription)", category: "SettingsViewModel")
+            errorMessage = AppError.from(error, fallback: "Local data could not be cleared.").localizedDescription
         }
     }
 
-    func resetOnboarding(profile: UserProfile, context: ModelContext) {
-        profile.onboardingCompleted = false
+    func resetOnboarding(profile: UserProfile) {
         do {
-            try context.save()
+            try persistenceService.resetOnboarding(profile: profile)
             toastMessage = "Onboarding reset"
         } catch {
-            errorMessage = error.localizedDescription
+            logger.error("Reset onboarding failed: \(error.localizedDescription)", category: "SettingsViewModel")
+            errorMessage = AppError.from(error, fallback: "Onboarding could not be reset.").localizedDescription
         }
     }
 
     func export(profile: UserProfile, settings: AppSettings, projects: [ContentProject], assignments: [PlannerAssignment]) {
         do {
-            shareItems = [try CopyExportService.exportURL(profile: profile, settings: settings, projects: projects, assignments: assignments)]
+            shareItems = [try exportWorkspaceUseCase.execute(profile: profile, settings: settings, projects: projects, assignments: assignments)]
             toastMessage = "Export ready"
         } catch {
-            errorMessage = error.localizedDescription
+            logger.error("Export workspace failed: \(error.localizedDescription)", category: "SettingsViewModel")
+            errorMessage = AppError.from(error, fallback: "The export could not be prepared.").localizedDescription
         }
     }
 
@@ -111,7 +125,8 @@ final class SettingsViewModel: ObservableObject {
             try await AppBootstrapper.importSampleData(context: context, profile: profile)
             toastMessage = "Sample data imported"
         } catch {
-            errorMessage = error.localizedDescription
+            logger.error("Import sample data failed: \(error.localizedDescription)", category: "SettingsViewModel")
+            errorMessage = AppError.from(error, fallback: "Sample data could not be imported.").localizedDescription
         }
     }
 }
