@@ -1,6 +1,10 @@
 import SwiftUI
 
 struct DashboardView: View {
+    @EnvironmentObject private var subscriptionStore: SubscriptionStore
+    @EnvironmentObject private var featureAccessController: FeatureAccessController
+    @EnvironmentObject private var paywallController: PaywallController
+
     let container: AppContainer
     let profile: UserProfile
     let settings: AppSettings
@@ -70,7 +74,14 @@ struct DashboardView: View {
 
                     Spacer()
 
-                    TagChip(title: settings.providerMode.displayName, isSelected: true, icon: "bolt.horizontal.fill")
+                    VStack(alignment: .trailing, spacing: 10) {
+                        TagChip(title: settings.providerMode.displayName, isSelected: true, icon: "bolt.horizontal.fill")
+                        TagChip(
+                            title: subscriptionStore.entitlementTier.displayName,
+                            isSelected: subscriptionStore.isPro,
+                            icon: subscriptionStore.isPro ? "crown.fill" : "sparkles"
+                        )
+                    }
                 }
 
                 VStack(alignment: .leading, spacing: 10) {
@@ -99,6 +110,19 @@ struct DashboardView: View {
                     buttonChip(title: "Library", icon: "square.stack.3d.up.fill", action: onOpenLibrary)
                     buttonChip(title: "Prompt", icon: "sparkles", action: onCreateContent)
                     buttonChip(title: "Settings", icon: "slider.horizontal.3", action: { showSettings = true })
+                }
+
+                if !subscriptionStore.isPro {
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text(featureAccessController.usageStatusText(settings: settings))
+                            .font(.system(size: 12, weight: .semibold, design: .rounded))
+                            .foregroundStyle(AppTheme.textMuted)
+
+                        Button("Upgrade to Pro") {
+                            paywallController.present(PaywallContext(reason: .dashboardUpgrade))
+                        }
+                        .buttonStyle(AppSecondaryButtonStyle())
+                    }
                 }
             }
         }
@@ -334,7 +358,20 @@ struct DashboardView: View {
                                     .font(.system(size: 16, weight: .bold, design: .rounded))
                                     .foregroundStyle(AppTheme.textPrimary)
                                 Spacer()
-                                TagChip(title: template.category, icon: "bookmark.fill")
+                                HStack(spacing: 8) {
+                                    if template.isPro {
+                                        Text("PRO")
+                                            .font(.system(size: 10, weight: .heavy, design: .rounded))
+                                            .foregroundStyle(AppTheme.warning)
+                                            .padding(.horizontal, 10)
+                                            .padding(.vertical, 6)
+                                            .background(
+                                                Capsule(style: .continuous)
+                                                    .fill(AppTheme.warning.opacity(0.12))
+                                            )
+                                    }
+                                    TagChip(title: template.category, icon: "bookmark.fill")
+                                }
                             }
                             Text(template.templateDescription)
                                 .font(.system(size: 13, weight: .medium, design: .rounded))

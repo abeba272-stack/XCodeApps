@@ -18,6 +18,9 @@ struct AIContentMachineApp: App {
         WindowGroup {
             RootView(container: appContainer)
                 .environmentObject(themeManager)
+                .environmentObject(appContainer.subscriptionStore)
+                .environmentObject(appContainer.featureAccessController)
+                .environmentObject(appContainer.paywallController)
                 .preferredColorScheme(themeManager.colorScheme)
         }
         .modelContainer(modelContainer)

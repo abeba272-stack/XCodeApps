@@ -1,6 +1,10 @@
 import SwiftUI
 
 struct CreateContentView: View {
+    @EnvironmentObject private var subscriptionStore: SubscriptionStore
+    @EnvironmentObject private var featureAccessController: FeatureAccessController
+    @EnvironmentObject private var paywallController: PaywallController
+
     let profile: UserProfile
     let settings: AppSettings
     let templates: [TemplateModel]
@@ -44,6 +48,12 @@ struct CreateContentView: View {
                     .buttonStyle(AppPrimaryButtonStyle())
                     .disabled(!canGenerate)
                     .opacity(canGenerate ? 1 : 0.65)
+
+                    if !subscriptionStore.isPro {
+                        Text("Free includes \(FeatureAccessPolicy.freeGenerationLimitPerMonth) generations per month, Offline Mock, and all base workflow features.")
+                            .font(.system(size: 12, weight: .medium, design: .rounded))
+                            .foregroundStyle(AppTheme.textMuted)
+                    }
                 }
             }
             .padding(AppTheme.screenPadding)
@@ -54,7 +64,11 @@ struct CreateContentView: View {
         .onAppear {
             viewModel.preload(from: profile)
             if let initialTemplate {
-                viewModel.selectedTemplate = initialTemplate
+                if featureAccessController.canUseTemplate(initialTemplate) {
+                    viewModel.applyTemplate(initialTemplate)
+                } else {
+                    paywallController.present(PaywallContext(reason: .proTemplate(name: initialTemplate.name)))
+                }
             }
         }
         .navigationDestination(isPresented: Binding(
@@ -97,6 +111,13 @@ struct CreateContentView: View {
                     summaryPill(title: viewModel.platform.rawValue, icon: viewModel.platform.icon)
                     summaryPill(title: viewModel.tone.rawValue, icon: "waveform.path.ecg")
                     summaryPill(title: viewModel.mode.rawValue, icon: "wand.and.stars")
+                    summaryPill(title: subscriptionStore.entitlementTier.displayName, icon: subscriptionStore.isPro ? "crown.fill" : "sparkles")
+                }
+
+                if !subscriptionStore.isPro {
+                    Text(featureAccessController.usageStatusText(settings: settings))
+                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                        .foregroundStyle(AppTheme.textMuted)
                 }
             }
         }
@@ -222,7 +243,14 @@ struct CreateContentView: View {
 
                 menuTile(title: "Mode", value: viewModel.mode.rawValue, icon: "wand.and.stars") {
                     ForEach(GenerationMode.allCases) { mode in
-                        Button(mode.rawValue) { viewModel.mode = mode }
+                        Button(modeTitle(mode)) {
+                            guard featureAccessController.canUseGenerationMode(mode) else {
+                                paywallController.present(PaywallContext(reason: .batchIdeas))
+                                return
+                            }
+
+                            viewModel.mode = mode
+                        }
                     }
                 }
             }
@@ -275,25 +303,80 @@ struct CreateContentView: View {
         }
     }
 
+    private func modeTitle(_ mode: GenerationMode) -> String {
+        if mode == .batchIdeas && !subscriptionStore.isPro {
+            return "\(mode.rawValue) • Pro"
+        }
+        return mode.rawValue
+    }
+
     private func templateOption(template: TemplateModel?, title: String, description: String) -> some View {
         let isSelected = viewModel.selectedTemplate?.id == template?.id || (template == nil && viewModel.selectedTemplate == nil)
+        let isLocked = template?.isPro == true && !subscriptionStore.isPro
+
         return Button {
-            viewModel.selectedTemplate = template
+            guard let template else {
+                viewModel.applyTemplate(nil)
+                return
+            }
+
+            guard featureAccessController.canUseTemplate(template) else {
+                paywallController.present(PaywallContext(reason: .proTemplate(name: template.name)))
+                return
+            }
+
+            viewModel.applyTemplate(template)
         } label: {
             VStack(alignment: .leading, spacing: 10) {
-                Text(title)
-                    .font(.system(size: 15, weight: .bold, design: .rounded))
-                    .foregroundStyle(isSelected ? Color.black : AppTheme.textPrimary)
-                Text(description)
-                    .font(.system(size: 13, weight: .medium, design: .rounded))
-                    .foregroundStyle(isSelected ? Color.black.opacity(0.78) : AppTheme.textSecondary)
+                HStack(alignment: .top) {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(title)
+                            .font(.system(size: 15, weight: .bold, design: .rounded))
+                            .foregroundStyle(isSelected ? Color.black : AppTheme.textPrimary)
+                        Text(description)
+                            .font(.system(size: 13, weight: .medium, design: .rounded))
+                            .foregroundStyle(isSelected ? Color.black.opacity(0.78) : AppTheme.textSecondary)
+                    }
+                    Spacer(minLength: 8)
+
+                    if let template {
+                        Text(template.accessLabel.uppercased())
+                            .font(.system(size: 10, weight: .heavy, design: .rounded))
+                            .foregroundStyle(isSelected ? Color.black.opacity(0.72) : (template.isPro ? AppTheme.warning : AppTheme.textMuted))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(
+                                Capsule(style: .continuous)
+                                    .fill(isSelected ? Color.white.opacity(0.34) : (template.isPro ? AppTheme.warning.opacity(0.15) : AppTheme.surfaceTertiary))
+                            )
+                    }
+                }
+
                 Spacer()
-                Text(template?.exampleHook ?? "Generate with more freedom.")
-                    .font(.system(size: 12, weight: .medium, design: .rounded))
-                    .foregroundStyle(isSelected ? Color.black.opacity(0.76) : AppTheme.textMuted)
-                    .lineLimit(3)
+
+                if let template {
+                    Text(template.blueprint.isEmpty ? template.exampleHook : template.blueprint)
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundStyle(isSelected ? Color.black.opacity(0.76) : AppTheme.textMuted)
+                        .lineLimit(4)
+
+                    HStack(spacing: 8) {
+                        if let firstPlatform = template.idealPlatforms.first {
+                            miniMetaPill(title: firstPlatform.rawValue, selected: isSelected)
+                        }
+                        miniMetaPill(title: template.recommendedTone.rawValue, selected: isSelected)
+                        if isLocked {
+                            miniMetaPill(title: "Locked", selected: isSelected)
+                        }
+                    }
+                } else {
+                    Text("Generate with more freedom.")
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .foregroundStyle(isSelected ? Color.black.opacity(0.76) : AppTheme.textMuted)
+                        .lineLimit(3)
+                }
             }
-            .frame(width: 210, height: 150, alignment: .topLeading)
+            .frame(width: 220, height: 170, alignment: .topLeading)
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: AppTheme.radiusMedium, style: .continuous)
@@ -305,6 +388,18 @@ struct CreateContentView: View {
             )
         }
         .buttonStyle(.plain)
+    }
+
+    private func miniMetaPill(title: String, selected: Bool) -> some View {
+        Text(title)
+            .font(.system(size: 10, weight: .bold, design: .rounded))
+            .foregroundStyle(selected ? Color.black.opacity(0.75) : AppTheme.textSecondary)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 5)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(selected ? Color.white.opacity(0.26) : AppTheme.surfaceMuted)
+            )
     }
 
     private func errorCard(message: String) -> some View {

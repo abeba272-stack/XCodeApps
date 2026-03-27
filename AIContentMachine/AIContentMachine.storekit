@@ -1,0 +1,68 @@
+{
+  "identifier" : "AIContentMachineStoreKitConfig",
+  "nonConsumables" : [
+
+  ],
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "9.99",
+      "familyShareable" : false,
+      "internalID" : "pro-monthly",
+      "localizations" : [
+        {
+          "description" : "Unlock Pro templates, unlimited generations, Batch Ideas, Local AI Server mode, and premium export tools.",
+          "displayName" : "AI Content Machine Pro Monthly",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.abebait.aicontentmachine.pro.monthly",
+      "recurringSubscriptionPeriod" : "P1M",
+      "referenceName" : "AI Content Machine Pro Monthly",
+      "subscriptionGroupID" : "pro-subscriptions",
+      "type" : "RecurringSubscription"
+    },
+    {
+      "displayPrice" : "59.99",
+      "familyShareable" : false,
+      "internalID" : "pro-yearly",
+      "localizations" : [
+        {
+          "description" : "Best value yearly plan for creators using AI Content Machine every week.",
+          "displayName" : "AI Content Machine Pro Yearly",
+          "locale" : "en_US"
+        }
+      ],
+      "productID" : "com.abebait.aicontentmachine.pro.yearly",
+      "recurringSubscriptionPeriod" : "P1Y",
+      "referenceName" : "AI Content Machine Pro Yearly",
+      "subscriptionGroupID" : "pro-subscriptions",
+      "type" : "RecurringSubscription"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "AIContentMachine"
+  },
+  "subscriptionGroups" : [
+    {
+      "id" : "pro-subscriptions",
+      "localizations" : [
+        {
+          "locale" : "en_US",
+          "name" : "AI Content Machine Pro"
+        }
+      ],
+      "name" : "AI Content Machine Pro",
+      "subscriptions" : [
+        "pro-monthly",
+        "pro-yearly"
+      ]
+    }
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

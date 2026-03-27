@@ -4,6 +4,7 @@ import SwiftData
 struct RootView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var paywallController: PaywallController
     let container: AppContainer
 
     @Query private var profiles: [UserProfile]
@@ -37,6 +38,12 @@ struct RootView: View {
         }
         .task {
             await startLaunchFlowIfNeeded()
+        }
+        .sheet(item: $paywallController.context) { context in
+            NavigationStack {
+                PaywallView(context: context)
+            }
+            .presentationDetents([.medium, .large])
         }
         .onChange(of: settings.first?.themeRaw) { _, _ in
             themeManager.update(using: settings.first)

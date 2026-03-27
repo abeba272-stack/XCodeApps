@@ -26,6 +26,8 @@ final class ContentGeneratorViewModel: ObservableObject {
     private let duplicateProjectUseCase: DuplicateProjectUseCase
     private let persistenceService: any PersistenceService
     private let exportService: any ExportService
+    private let featureAccessController: FeatureAccessController
+    private let paywallController: PaywallController
     private let logger: any AppLogger
 
     private(set) var latestRequest: GenerationRequest?
@@ -37,6 +39,8 @@ final class ContentGeneratorViewModel: ObservableObject {
         duplicateProjectUseCase: DuplicateProjectUseCase,
         persistenceService: any PersistenceService,
         exportService: any ExportService,
+        featureAccessController: FeatureAccessController,
+        paywallController: PaywallController,
         logger: any AppLogger
     ) {
         self.generateContentUseCase = generateContentUseCase
@@ -45,6 +49,8 @@ final class ContentGeneratorViewModel: ObservableObject {
         self.duplicateProjectUseCase = duplicateProjectUseCase
         self.persistenceService = persistenceService
         self.exportService = exportService
+        self.featureAccessController = featureAccessController
+        self.paywallController = paywallController
         self.logger = logger
     }
 
@@ -88,12 +94,21 @@ final class ContentGeneratorViewModel: ObservableObject {
     func generate(settings: AppSettings) async {
         do {
             let request = try buildRequest()
+            switch featureAccessController.generationGate(settings: settings, mode: request.mode, template: selectedTemplate) {
+            case .allowed:
+                break
+            case .paywall(let context):
+                paywallController.present(context)
+                return
+            }
+
             latestRequest = request
             isGenerating = true
             errorMessage = nil
 
             let generated = try await generateContentUseCase.execute(request: request, settings: settings)
             applyGeneratedContent(generated, request: request)
+            featureAccessController.recordSuccessfulGeneration(settings: settings)
         } catch {
             logger.error("Generate content failed: \(error.localizedDescription)", category: "ContentGeneratorViewModel")
             errorMessage = AppError.from(error, fallback: "The content package could not be generated.").localizedDescription
@@ -178,6 +193,10 @@ final class ContentGeneratorViewModel: ObservableObject {
 
     func copyFullPackage() {
         guard let session else { return }
+        guard featureAccessController.canCopyFullPackage() else {
+            paywallController.present(PaywallContext(reason: .premiumCopy))
+            return
+        }
         UIPasteboard.general.string = exportService.formattedPackage(for: session)
         didCopyMessage = "Full package copied"
     }
@@ -190,11 +209,32 @@ final class ContentGeneratorViewModel: ObservableObject {
 
     func prepareSharePackage() {
         guard let session else { return }
+        guard featureAccessController.canCopyFullPackage() else {
+            paywallController.present(PaywallContext(reason: .premiumCopy))
+            return
+        }
         shareItems = [exportService.formattedPackage(for: session)]
     }
 
     func videoPromptText(for session: GenerationSession) -> String {
         exportService.videoPrompt(for: session)
+    }
+
+    func applyTemplate(_ template: TemplateModel?) {
+        selectedTemplate = template
+
+        guard let template else { return }
+
+        if let idealPlatform = template.idealPlatforms.first {
+            platform = idealPlatform
+        }
+        tone = template.recommendedTone
+        goal = template.recommendedGoal
+        style = template.recommendedStyle
+
+        if category.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || category == "General" {
+            category = template.category
+        }
     }
 
     private func applyGeneratedContent(_ generated: GeneratedContent, request: GenerationRequest) {

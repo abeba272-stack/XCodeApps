@@ -5,12 +5,15 @@ import SwiftData
 final class AppSettings {
     static let defaultLocalServerEndpoint = "http://192.168.1.23:3000/chat"
 
-    @Attribute(.unique) var id: UUID
-    var themeRaw: String
-    var providerModeRaw: String
-    var apiKey: String
-    var apiEndpoint: String
-    var apiModel: String
+    @Attribute(.unique) var id: UUID = UUID()
+    var themeRaw: String = AppThemePreference.dark.rawValue
+    var providerModeRaw: String = AIProviderMode.mock.rawValue
+    var apiKey: String = ""
+    var apiEndpoint: String = ""
+    var apiModel: String = "content-engine-v1"
+    var starterTemplateSeedVersion: Int = 0
+    var generationWindowStartedAt: Date?
+    var freeGenerationCountInWindow: Int = 0
     var lastExportedAt: Date?
 
     init(
@@ -20,6 +23,9 @@ final class AppSettings {
         apiKey: String = "",
         apiEndpoint: String = "",
         apiModel: String = "content-engine-v1",
+        starterTemplateSeedVersion: Int = 0,
+        generationWindowStartedAt: Date? = nil,
+        freeGenerationCountInWindow: Int = 0,
         lastExportedAt: Date? = nil
     ) {
         self.id = id
@@ -28,6 +34,9 @@ final class AppSettings {
         self.apiKey = apiKey
         self.apiEndpoint = apiEndpoint
         self.apiModel = apiModel
+        self.starterTemplateSeedVersion = starterTemplateSeedVersion
+        self.generationWindowStartedAt = generationWindowStartedAt
+        self.freeGenerationCountInWindow = freeGenerationCountInWindow
         self.lastExportedAt = lastExportedAt
     }
 }

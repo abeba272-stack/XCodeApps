@@ -9,6 +9,9 @@ final class AppContainer: ObservableObject {
     let exportService: any ExportService
     let settingsService: any SettingsService
     let contentGenerationFactory: any ContentGenerationServiceFactory
+    let subscriptionStore: SubscriptionStore
+    let featureAccessController: FeatureAccessController
+    let paywallController: PaywallController
 
     let generateContentUseCase: GenerateContentUseCase
     let regenerateSectionUseCase: RegenerateSectionUseCase
@@ -25,6 +28,13 @@ final class AppContainer: ObservableObject {
         let dataStore = SwiftDataStore(modelContainer: modelContainer, logger: logger)
         let exportService = DefaultExportService()
         let generationFactory = DefaultContentGenerationServiceFactory(networkClient: networkClient, logger: logger)
+        let subscriptionStore = SubscriptionStore(logger: logger)
+        let featureAccessController = FeatureAccessController(
+            modelContainer: modelContainer,
+            subscriptionStore: subscriptionStore,
+            logger: logger
+        )
+        let paywallController = PaywallController()
 
         self.logger = logger
         self.networkClient = networkClient
@@ -32,6 +42,9 @@ final class AppContainer: ObservableObject {
         self.exportService = exportService
         self.settingsService = dataStore
         self.contentGenerationFactory = generationFactory
+        self.subscriptionStore = subscriptionStore
+        self.featureAccessController = featureAccessController
+        self.paywallController = paywallController
 
         self.generateContentUseCase = GenerateContentUseCase(factory: generationFactory)
         self.regenerateSectionUseCase = RegenerateSectionUseCase(factory: generationFactory)
@@ -51,6 +64,8 @@ final class AppContainer: ObservableObject {
             duplicateProjectUseCase: duplicateProjectUseCase,
             persistenceService: persistenceService,
             exportService: exportService,
+            featureAccessController: featureAccessController,
+            paywallController: paywallController,
             logger: logger
         )
     }

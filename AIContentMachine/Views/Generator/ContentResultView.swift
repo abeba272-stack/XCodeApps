@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ContentResultView: View {
+    @EnvironmentObject private var subscriptionStore: SubscriptionStore
+
     @ObservedObject var viewModel: ContentGeneratorViewModel
     @Bindable var session: GenerationSession
     let settings: AppSettings
@@ -53,6 +55,7 @@ struct ContentResultView: View {
                 } label: {
                     Image(systemName: "square.and.arrow.up")
                 }
+                .foregroundStyle(subscriptionStore.isPro ? AppTheme.textPrimary : AppTheme.warning)
             }
         }
         .sheet(isPresented: Binding(
@@ -192,7 +195,7 @@ struct ContentResultView: View {
                     }
                     .buttonStyle(AppPrimaryButtonStyle())
 
-                    CopyButton(title: "Copy Full Package") {
+                    CopyButton(title: subscriptionStore.isPro ? "Copy Full Package" : "Copy Full Package • Pro") {
                         viewModel.copyFullPackage()
                     }
                 }
@@ -541,7 +544,7 @@ struct ContentResultView: View {
                     }
                     .buttonStyle(AppSecondaryButtonStyle())
 
-                    CopyButton(title: "Copy Full") {
+                    CopyButton(title: subscriptionStore.isPro ? "Copy Full" : "Copy Full • Pro") {
                         viewModel.copyFullPackage()
                     }
                 }

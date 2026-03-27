@@ -77,6 +77,13 @@
 		AA1000000000000000000006 /* AppServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000006 /* AppServices.swift */; };
 		AA1000000000000000000007 /* AIEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000007 /* AIEngine.swift */; };
 		AA1000000000000000000008 /* DefaultAppServices.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000008 /* DefaultAppServices.swift */; };
+		AA1000000000000000000009 /* MonetizationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000009 /* MonetizationModels.swift */; };
+		AA100000000000000000000A /* FeatureAccessController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200000000000000000000A /* FeatureAccessController.swift */; };
+		AA100000000000000000000B /* SubscriptionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200000000000000000000B /* SubscriptionStore.swift */; };
+		AA100000000000000000000C /* TemplateSeedService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200000000000000000000C /* TemplateSeedService.swift */; };
+		AA100000000000000000000D /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200000000000000000000D /* PaywallView.swift */; };
+		AA100000000000000000000E /* FeatureAccessPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200000000000000000000E /* FeatureAccessPolicyTests.swift */; };
+		AA100000000000000000000F /* TemplateEngineCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200000000000000000000F /* TemplateEngineCatalogTests.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -162,6 +169,14 @@
 		AA2000000000000000000006 /* AppServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppServices.swift; sourceTree = "<group>"; };
 		AA2000000000000000000007 /* AIEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIEngine.swift; sourceTree = "<group>"; };
 		AA2000000000000000000008 /* DefaultAppServices.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultAppServices.swift; sourceTree = "<group>"; };
+		AA2000000000000000000009 /* MonetizationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MonetizationModels.swift; sourceTree = "<group>"; };
+		AA200000000000000000000A /* FeatureAccessController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureAccessController.swift; sourceTree = "<group>"; };
+		AA200000000000000000000B /* SubscriptionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubscriptionStore.swift; sourceTree = "<group>"; };
+		AA200000000000000000000C /* TemplateSeedService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateSeedService.swift; sourceTree = "<group>"; };
+		AA200000000000000000000D /* PaywallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PaywallView.swift; sourceTree = "<group>"; };
+		AA200000000000000000000E /* FeatureAccessPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureAccessPolicyTests.swift; sourceTree = "<group>"; };
+		AA200000000000000000000F /* TemplateEngineCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateEngineCatalogTests.swift; sourceTree = "<group>"; };
+		AA2000000000000000000010 /* AIContentMachine.storekit */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = AIContentMachine.storekit; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -173,11 +188,14 @@
 				349D2EA3E0D1770CEA0F6FDA /* ContentGenerationService.swift */,
 				249109F202CB8DF3AA23734F /* CopyExportService.swift */,
 				AA2000000000000000000008 /* DefaultAppServices.swift */,
+				AA200000000000000000000A /* FeatureAccessController.swift */,
 				235B1CBBC3110B7E8408905D /* MockContentGenerationService.swift */,
 				AA2000000000000000000005 /* NetworkClient.swift */,
 				D23F9165B51DB411C7A7774E /* PlannerService.swift */,
 				6EDB2951DFA411CB4ABAF9CA /* RealAIContentService.swift */,
+				AA200000000000000000000B /* SubscriptionStore.swift */,
 				D57EE94426EB4C9E70F72974 /* TemplateEngine.swift */,
+				AA200000000000000000000C /* TemplateSeedService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -185,6 +203,7 @@
 		08B6CCB509BB29CFC437E6CF /* Settings */ = {
 			isa = PBXGroup;
 			children = (
+				AA200000000000000000000D /* PaywallView.swift */,
 				50278792D30E4413770D4117 /* SettingsView.swift */,
 			);
 			path = Settings;
@@ -230,6 +249,7 @@
 				C217DB9306776DC8C8678EF4 /* ContentProject.swift */,
 				AA2000000000000000000004 /* GenerationSession.swift */,
 				2CF12D0AEF5B996D4A8B98D5 /* GenerationModels.swift */,
+				AA2000000000000000000009 /* MonetizationModels.swift */,
 				22814ECAE6CE0DB8EF66F7D1 /* PlannerAssignment.swift */,
 				A9DD9A796C5B100CEB52EADE /* TemplateModel.swift */,
 				015AAA63686AC2317E5F744B /* UserProfile.swift */,
@@ -241,6 +261,7 @@
 			isa = PBXGroup;
 			children = (
 				07F39D0D01B64AEBEA18BE97 /* AIContentMachineApp.swift */,
+				AA2000000000000000000010 /* AIContentMachine.storekit */,
 				A7AC21DA532B09CF8A20BD2E /* Assets.xcassets */,
 				4B77526B994EDA712ACCFA2C /* Components */,
 				557024E25492450FDEC0E0EB /* Models */,
@@ -344,8 +365,10 @@
 			isa = PBXGroup;
 			children = (
 				05D72129750E2CED7A65E0B7 /* ContentScoreCalculatorTests.swift */,
+				AA200000000000000000000E /* FeatureAccessPolicyTests.swift */,
 				7067690F4A333CE994546F37 /* MockContentGenerationServiceTests.swift */,
 				C562160CF239631D2286F5EB /* PlannerServiceTests.swift */,
+				AA200000000000000000000F /* TemplateEngineCatalogTests.swift */,
 				ADB76FD80F7814941B2D3F9D /* ToneLanguageSwitchTests.swift */,
 			);
 			name = Tests;
@@ -499,6 +522,7 @@
 				D0184DD76ABA59FCDB1C8A6F /* DashboardViewModel.swift in Sources */,
 				AA1000000000000000000008 /* DefaultAppServices.swift in Sources */,
 				40B3A9223A2A4BA8040C6D85 /* EmptyStateView.swift in Sources */,
+				AA100000000000000000000A /* FeatureAccessController.swift in Sources */,
 				918E892CAAE73477BF5AC879 /* GenerationLoadingView.swift in Sources */,
 				AA1000000000000000000004 /* GenerationSession.swift in Sources */,
 				7178F572210A7CA873B45821 /* GenerationModels.swift in Sources */,
@@ -507,6 +531,7 @@
 				061D0FFBECC582494D287322 /* LanguageSelectionView.swift in Sources */,
 				BC5596AF0DC7712A6EA19ED7 /* MetricCard.swift in Sources */,
 				998B69D4C2D4E69D77D7E248 /* MockContentGenerationService.swift in Sources */,
+				AA1000000000000000000009 /* MonetizationModels.swift in Sources */,
 				114D011D2ECFE18DC1D6C00B /* ModelContainerProvider.swift in Sources */,
 				AA1000000000000000000005 /* NetworkClient.swift in Sources */,
 				8D1395C8701A2DEC87D04234 /* NicheSelectionView.swift in Sources */,
@@ -522,14 +547,17 @@
 				CF4FAE0B55AD39A1BB5DDD5E /* RealAIContentService.swift in Sources */,
 				2BD72B8B666DF88CD94053E1 /* RootView.swift in Sources */,
 				7FEF0FB07461DDA3E0DF89BA /* SectionHeaderView.swift in Sources */,
+				AA100000000000000000000D /* PaywallView.swift in Sources */,
 				1580B14A48F1A018664D0F39 /* SettingsView.swift in Sources */,
 				6C83F2BD42CF124D386D30C1 /* SettingsViewModel.swift in Sources */,
 				8006DDBC25B08ACB220226C9 /* ShareSheet.swift in Sources */,
 				392E6AB9BF6FCC6596332506 /* StablePicker.swift in Sources */,
 				D0AEC4B0BC85DBBA84E5968C /* StatusBadge.swift in Sources */,
 				7D0B50C5493E8876A551C4D6 /* StringListStorage.swift in Sources */,
+				AA100000000000000000000B /* SubscriptionStore.swift in Sources */,
 				B2EF72C7E07B904ACE407E94 /* TagChip.swift in Sources */,
 				62C51B89E571AB25DAA7EE1D /* TemplateEngine.swift in Sources */,
+				AA100000000000000000000C /* TemplateSeedService.swift in Sources */,
 				2F051447634D6B17B6B91CF4 /* TemplateModel.swift in Sources */,
 				4A6EC4C9151A617541EB0F96 /* TemplatesView.swift in Sources */,
 				30736BEB244CF9AF85A8619F /* TemplatesViewModel.swift in Sources */,
@@ -545,8 +573,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				60D85C30565E69C78AF10103 /* ContentScoreCalculatorTests.swift in Sources */,
+				AA100000000000000000000E /* FeatureAccessPolicyTests.swift in Sources */,
 				6C73446A3B169567CF3EA27B /* MockContentGenerationServiceTests.swift in Sources */,
 				D1D8E7C19684366CB46DD0C1 /* PlannerServiceTests.swift in Sources */,
+				AA100000000000000000000F /* TemplateEngineCatalogTests.swift in Sources */,
 				2A59DDB28DEEAEE9FE787002 /* ToneLanguageSwitchTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

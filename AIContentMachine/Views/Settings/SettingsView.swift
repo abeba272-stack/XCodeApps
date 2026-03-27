@@ -5,6 +5,9 @@ struct SettingsView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var subscriptionStore: SubscriptionStore
+    @EnvironmentObject private var featureAccessController: FeatureAccessController
+    @EnvironmentObject private var paywallController: PaywallController
 
     let profile: UserProfile
     let settings: AppSettings
@@ -13,6 +16,7 @@ struct SettingsView: View {
     let container: AppContainer
 
     @StateObject private var viewModel: SettingsViewModel
+    @State private var isRestoringPurchases = false
 
     init(
         profile: UserProfile,
@@ -80,6 +84,33 @@ struct SettingsView: View {
                 }
             }
 
+            Section(subscriptionStore.isPro ? "AI Content Machine Pro" : "Upgrade to Pro") {
+                LabeledContent("Plan") {
+                    Text(subscriptionStore.entitlementTier.displayName)
+                        .foregroundStyle(subscriptionStore.isPro ? AppTheme.success : AppTheme.textSecondary)
+                }
+
+                if !subscriptionStore.isPro {
+                    Text("Pro unlocks the full template library, unlimited generations, Batch Ideas, Local AI Server mode, and premium export tools.")
+                        .font(.footnote)
+                        .foregroundStyle(AppTheme.textSecondary)
+
+                    Button("Upgrade to Pro") {
+                        paywallController.present(PaywallContext(reason: .settingsUpgrade))
+                    }
+                }
+
+                Button(isRestoringPurchases ? "Restoring…" : "Restore Purchases") {
+                    isRestoringPurchases = true
+                    Task {
+                        await subscriptionStore.restorePurchases()
+                        isRestoringPurchases = false
+                    }
+                }
+
+                Link("Manage Subscription", destination: URL(string: "https://apps.apple.com/account/subscriptions")!)
+            }
+
             Section("AI Provider") {
                 Picker("Provider mode", selection: $viewModel.providerMode) {
                     ForEach(AIProviderMode.allCases) { mode in
@@ -105,6 +136,10 @@ struct SettingsView: View {
                     themeManager.preference = viewModel.theme
                 }
                 Button("Export Data") {
+                    guard featureAccessController.canExportWorkspace() else {
+                        paywallController.present(PaywallContext(reason: .workspaceExport))
+                        return
+                    }
                     viewModel.export(profile: profile, settings: settings, projects: projects, assignments: assignments)
                 }
                 Button("Import Sample Data") {
@@ -126,6 +161,11 @@ struct SettingsView: View {
         .background(PremiumBackground())
         .onAppear {
             viewModel.load(profile: profile, settings: settings)
+        }
+        .onChange(of: viewModel.providerMode) { _, newValue in
+            guard !featureAccessController.canUseProviderMode(newValue) else { return }
+            viewModel.providerMode = .mock
+            paywallController.present(PaywallContext(reason: .localAIServer))
         }
         .alert("Settings", isPresented: Binding(
             get: { viewModel.errorMessage != nil },

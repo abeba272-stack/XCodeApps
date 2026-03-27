@@ -21,14 +21,16 @@ enum AppBootstrapper {
         }
 
         let settings = try context.fetch(FetchDescriptor<AppSettings>())
-        if settings.isEmpty {
-            context.insert(AppSettings())
+        let activeSettings: AppSettings
+        if let existingSettings = settings.first {
+            activeSettings = existingSettings
+        } else {
+            let newSettings = AppSettings()
+            context.insert(newSettings)
+            activeSettings = newSettings
         }
 
-        let templates = try context.fetch(FetchDescriptor<TemplateModel>())
-        if templates.isEmpty {
-            TemplateEngine.makeDefaultTemplates().forEach { context.insert($0) }
-        }
+        TemplateSeedService.seedStarterTemplates(in: context, settings: activeSettings)
 
         try context.save()
     }

@@ -4,7 +4,10 @@ import UIKit
 
 struct ContentDetailView: View {
     @Environment(\.modelContext) private var modelContext
+    @EnvironmentObject private var subscriptionStore: SubscriptionStore
+    @EnvironmentObject private var paywallController: PaywallController
     @Bindable var project: ContentProject
+    @State private var errorMessage: String?
 
     private var videoPrompt: String {
         CopyExportService.videoPromptText(for: project)
@@ -32,10 +35,24 @@ struct ContentDetailView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button("Save") {
                     project.updatedAt = .now
-                    try? modelContext.save()
+                    do {
+                        try modelContext.save()
+                    } catch {
+                        errorMessage = "The project could not be saved right now."
+                    }
                 }
                 .buttonStyle(AppQuietButtonStyle())
             }
+        }
+        .alert("Project", isPresented: Binding(
+            get: { errorMessage != nil },
+            set: { if !$0 { errorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) {
+                errorMessage = nil
+            }
+        } message: {
+            Text(errorMessage ?? "")
         }
     }
 
@@ -68,7 +85,11 @@ struct ContentDetailView: View {
                         UIPasteboard.general.string = videoPrompt
                     }
 
-                    CopyButton(title: "Copy Full Package") {
+                    CopyButton(title: subscriptionStore.isPro ? "Copy Full Package" : "Copy Full Package • Pro") {
+                        guard subscriptionStore.isPro else {
+                            paywallController.present(PaywallContext(reason: .premiumCopy))
+                            return
+                        }
                         UIPasteboard.general.string = CopyExportService.formattedPackage(for: project)
                     }
                 }
