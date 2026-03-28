@@ -18,10 +18,37 @@ struct ModelContainerProvider {
         do {
             container = try ModelContainer(
                 for: schema,
-                configurations: [ModelConfiguration("AIContentMachine", schema: schema, isStoredInMemoryOnly: false)]
+                configurations: [Self.makePersistentConfiguration(schema: schema)]
             )
         } catch {
-            fatalError("Unable to create ModelContainer: \(error)")
+            NSLog("Persistent ModelContainer creation failed. Falling back to in-memory store. Error: \(error.localizedDescription)")
+
+            do {
+                container = try ModelContainer(
+                    for: schema,
+                    configurations: [ModelConfiguration("AIContentMachine-InMemory", schema: schema, isStoredInMemoryOnly: true)]
+                )
+            } catch {
+                fatalError("Unable to create any ModelContainer, including in-memory fallback: \(error)")
+            }
         }
+    }
+
+    private static func makePersistentConfiguration(schema: Schema) throws -> ModelConfiguration {
+        let fileManager = FileManager.default
+        let appSupportDirectory = try fileManager.url(
+            for: .applicationSupportDirectory,
+            in: .userDomainMask,
+            appropriateFor: nil,
+            create: true
+        )
+        let storeDirectory = appSupportDirectory.appendingPathComponent("AIContentMachine", isDirectory: true)
+
+        if !fileManager.fileExists(atPath: storeDirectory.path) {
+            try fileManager.createDirectory(at: storeDirectory, withIntermediateDirectories: true)
+        }
+
+        let storeURL = storeDirectory.appendingPathComponent("AIContentMachine.store")
+        return ModelConfiguration("AIContentMachine", schema: schema, url: storeURL)
     }
 }

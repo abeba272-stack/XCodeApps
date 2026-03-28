@@ -3,8 +3,11 @@ import SwiftData
 
 @MainActor
 final class SettingsViewModel: ObservableObject {
+    @Published var email: String = ""
     @Published var creatorName: String = ""
     @Published var nichesText: String = ""
+    @Published var defaultAudience: String = ""
+    @Published var persistentPromptNotes: String = ""
     @Published var selectedPlatforms: Set<ContentPlatform> = []
     @Published var selectedLanguage: ContentLanguage = .english
     @Published var selectedTone: ContentTone = .direct
@@ -39,8 +42,11 @@ final class SettingsViewModel: ObservableObject {
 
     func load(profile: UserProfile, settings: AppSettings) {
         let draft = settingsService.loadDraft(profile: profile, settings: settings)
+        email = draft.email
         creatorName = draft.creatorName
         nichesText = draft.nichesText
+        defaultAudience = draft.defaultAudience
+        persistentPromptNotes = draft.persistentPromptNotes
         selectedPlatforms = draft.selectedPlatforms
         selectedLanguage = draft.selectedLanguage
         selectedTone = draft.selectedTone
@@ -69,8 +75,11 @@ final class SettingsViewModel: ObservableObject {
 
     func save(profile: UserProfile, settings: AppSettings) {
         let draft = SettingsDraft(
+            email: email,
             creatorName: creatorName,
             nichesText: nichesText,
+            defaultAudience: defaultAudience,
+            persistentPromptNotes: persistentPromptNotes,
             selectedPlatforms: selectedPlatforms,
             selectedLanguage: selectedLanguage,
             selectedTone: selectedTone,

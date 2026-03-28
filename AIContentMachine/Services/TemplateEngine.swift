@@ -1,5 +1,13 @@
 import Foundation
 
+struct TemplateQuickStart: Equatable {
+    let topic: String
+    let audience: String
+    let category: String
+    let mode: GenerationMode
+    let durationSeconds: Double
+}
+
 enum TemplateEngine {
     static func makeDefaultTemplates() -> [TemplateModel] {
         [
@@ -378,6 +386,125 @@ enum TemplateEngine {
                 sortOrder: 22
             )
         ]
+    }
+
+    static func quickStart(for template: TemplateModel) -> TemplateQuickStart? {
+        switch template.seedKey {
+        case "this-is-why-people-fail-at-x":
+            return TemplateQuickStart(
+                topic: "Why smart creators still fail to turn attention into qualified clients",
+                audience: "Solo founders and personal-brand creators trying to monetize short-form content",
+                category: "Authority / Thought Leadership",
+                mode: .fullPackage,
+                durationSeconds: 35
+            )
+        case "the-real-reason-behind-x":
+            return TemplateQuickStart(
+                topic: "The real reason consistent creators still look invisible online",
+                audience: "Creators posting every week without meaningful growth",
+                category: "Authority / Thought Leadership",
+                mode: .fullPackage,
+                durationSeconds: 30
+            )
+        case "you-think-x-but-actually-y":
+            return TemplateQuickStart(
+                topic: "You think more content fixes low reach, but clearer positioning does",
+                audience: "Early-stage creators stuck below their next growth step",
+                category: "Education / Explainer",
+                mode: .fullPackage,
+                durationSeconds: 25
+            )
+        case "if-i-had-to-start-again":
+            return TemplateQuickStart(
+                topic: "If I had to rebuild a founder audience from zero in 2026, this is where I would start",
+                audience: "Founders starting a personal brand from scratch",
+                category: "Founder / Business",
+                mode: .fullPackage,
+                durationSeconds: 40
+            )
+        case "common-advice-that-is-wrong":
+            return TemplateQuickStart(
+                topic: "Common content advice that keeps small creators generic",
+                audience: "Creators following broad growth advice that never converts",
+                category: "Authority / Thought Leadership",
+                mode: .fullPackage,
+                durationSeconds: 30
+            )
+        case "before-after-transformation-breakdown":
+            return TemplateQuickStart(
+                topic: "Before and after I turned random posting into a repeatable content system",
+                audience: "Creators who feel inconsistent and scattered",
+                category: "Motivation / Mindset",
+                mode: .fullPackage,
+                durationSeconds: 35
+            )
+        case "contrarian-opinion-in-20-seconds":
+            return TemplateQuickStart(
+                topic: "Unpopular opinion: consistency is overrated when your message is weak",
+                audience: "Short-form creators obsessed with output volume",
+                category: "Trend / Short Hook",
+                mode: .fullPackage,
+                durationSeconds: 20
+            )
+        case "pain-agitate-solve-short-form":
+            return TemplateQuickStart(
+                topic: "Why your content gets views but no qualified leads",
+                audience: "Coaches and service founders who want buyers, not just reach",
+                category: "Product / Offer / Conversion",
+                mode: .fullPackage,
+                durationSeconds: 30
+            )
+        case "behind-the-scenes-build-in-public":
+            return TemplateQuickStart(
+                topic: "What building an AI content system actually looks like during a messy founder week",
+                audience: "Founders and indie builders who like build-in-public content",
+                category: "Founder / Business",
+                mode: .fullPackage,
+                durationSeconds: 35
+            )
+        case "what-i-would-do-from-zero":
+            return TemplateQuickStart(
+                topic: "What I would do from zero to get my first 100 qualified followers in 30 days",
+                audience: "Creators rebuilding from scratch with limited time",
+                category: "Founder / Business",
+                mode: .fullPackage,
+                durationSeconds: 40
+            )
+        case "myth-vs-reality-in-your-niche":
+            return TemplateQuickStart(
+                topic: "Myth vs reality: your niche is not too small, your angle is too vague",
+                audience: "Niche creators who think the market is too small",
+                category: "Niche Creator / Community",
+                mode: .fullPackage,
+                durationSeconds: 25
+            )
+        case "hot-take-with-personal-proof":
+            return TemplateQuickStart(
+                topic: "Hot take: most content advice is performance theater unless it leads to a real action",
+                audience: "Creators tired of generic social media tips",
+                category: "Personal Brand",
+                mode: .fullPackage,
+                durationSeconds: 30
+            )
+        case "quick-authority-breakdown":
+            return TemplateQuickStart(
+                topic: "The fastest signal that tells me a content strategy will never convert",
+                audience: "Experts and consultants using content to build authority",
+                category: "Authority / Thought Leadership",
+                mode: .fullPackage,
+                durationSeconds: 25
+            )
+        case "direct-response-offer-cta":
+            return TemplateQuickStart(
+                topic: "How to present your offer on short-form video without sounding pushy",
+                audience: "Creators and founders who need more sales conversations",
+                category: "Product / Offer / Conversion",
+                mode: .fullPackage,
+                durationSeconds: 30
+            )
+        default:
+            return nil
+        }
     }
 
     static func structureHint(templateName: String?, rules: [String], language: ContentLanguage) -> String {

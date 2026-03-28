@@ -4,10 +4,11 @@ import SwiftData
 struct RootView: View {
     @Environment(\.modelContext) private var modelContext
     @EnvironmentObject private var themeManager: ThemeManager
+    @EnvironmentObject private var subscriptionStore: SubscriptionStore
+    @EnvironmentObject private var userSessionManager: UserSessionManager
     @EnvironmentObject private var paywallController: PaywallController
     let container: AppContainer
 
-    @Query private var profiles: [UserProfile]
     @Query private var settings: [AppSettings]
     @Query(sort: \ContentProject.updatedAt, order: .reverse) private var projects: [ContentProject]
     @Query(sort: \TemplateModel.name) private var templates: [TemplateModel]
@@ -47,6 +48,9 @@ struct RootView: View {
         }
         .onChange(of: settings.first?.themeRaw) { _, _ in
             themeManager.update(using: settings.first)
+        }
+        .onChange(of: subscriptionStore.entitlementTier) { _, _ in
+            userSessionManager.syncSubscriptionState()
         }
     }
 
@@ -93,18 +97,22 @@ struct RootView: View {
 
     @ViewBuilder
     private var resolvedContent: some View {
-        if let profile = profiles.first, let appSettings = settings.first {
-            if profile.onboardingCompleted {
-                MainShellView(
-                    container: container,
-                    profile: profile,
-                    settings: appSettings,
-                    projects: projects,
-                    templates: templates,
-                    assignments: assignments
-                )
+        if let appSettings = settings.first {
+            if let profile = userSessionManager.currentUser {
+                if profile.onboardingCompleted {
+                    MainShellView(
+                        container: container,
+                        profile: profile,
+                        settings: appSettings,
+                        projects: projects,
+                        templates: templates,
+                        assignments: assignments
+                    )
+                } else {
+                    OnboardingContainerView(profile: profile)
+                }
             } else {
-                OnboardingContainerView(profile: profile)
+                AuthView(container: container)
             }
         } else {
             VStack {
@@ -123,7 +131,7 @@ struct RootView: View {
 
     @MainActor
     private func startLaunchFlowIfNeeded() async {
-        guard isLaunchScreenVisible else { return }
+        guard isLaunchScreenVisible, !isBootstrapped else { return }
 
         let launchStartedAt = Date()
         let progressTask = Task { @MainActor in
@@ -133,6 +141,7 @@ struct RootView: View {
         do {
             try AppBootstrapper.bootstrap(in: modelContext)
             themeManager.update(using: settings.first)
+            await userSessionManager.restoreSessionIfNeeded()
             isBootstrapped = true
         } catch {
             bootstrapError = error.localizedDescription
@@ -146,7 +155,7 @@ struct RootView: View {
         }
 
         if isBootstrapped {
-            for _ in 0..<8 where profiles.first == nil || settings.first == nil {
+            for _ in 0..<8 where settings.first == nil {
                 try? await Task.sleep(for: .milliseconds(40))
             }
         }

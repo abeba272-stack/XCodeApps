@@ -6,6 +6,7 @@ struct SettingsView: View {
     @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var themeManager: ThemeManager
     @EnvironmentObject private var subscriptionStore: SubscriptionStore
+    @EnvironmentObject private var userSessionManager: UserSessionManager
     @EnvironmentObject private var featureAccessController: FeatureAccessController
     @EnvironmentObject private var paywallController: PaywallController
 
@@ -35,9 +36,55 @@ struct SettingsView: View {
 
     var body: some View {
         Form {
+            Section("Account") {
+                LabeledContent("Email") {
+                    Text(viewModel.email.isEmpty ? "No email" : viewModel.email)
+                        .foregroundStyle(AppTheme.textSecondary)
+                }
+
+                LabeledContent("Sign-in method") {
+                    Text(profile.authProvider.displayName)
+                        .foregroundStyle(AppTheme.textSecondary)
+                }
+
+                LabeledContent("Plan") {
+                    Text(userSessionManager.currentPlan.displayName)
+                        .foregroundStyle(userSessionManager.hasProAccess ? AppTheme.success : AppTheme.textSecondary)
+                }
+
+                if profile.isSpecialProUser {
+                    Text("This device uses the internal special Pro account override. Store purchases are bypassed for this account.")
+                        .font(.footnote)
+                        .foregroundStyle(AppTheme.textSecondary)
+                }
+
+                Button("Sign Out", role: .destructive) {
+                    userSessionManager.signOut()
+                    dismiss()
+                }
+            }
+
             Section("Creator Profile") {
                 TextField("Creator name", text: $viewModel.creatorName)
                 TextField("Niches (comma separated)", text: $viewModel.nichesText, axis: .vertical)
+            }
+
+            Section("Prompt Defaults") {
+                TextField("Default audience", text: $viewModel.defaultAudience, axis: .vertical)
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Persistent prompt notes")
+                    TextField(
+                        "Add recurring context like your niche angle, positioning, offers, or visual direction.",
+                        text: $viewModel.persistentPromptNotes,
+                        axis: .vertical
+                    )
+                    .lineLimit(4...8)
+
+                    Text("These notes are automatically injected into future AI prompt building to reduce repeated typing.")
+                        .font(.footnote)
+                        .foregroundStyle(AppTheme.textSecondary)
+                }
             }
 
             Section("Defaults") {
@@ -110,6 +157,25 @@ struct SettingsView: View {
 
                 Link("Manage Subscription", destination: URL(string: "https://apps.apple.com/account/subscriptions")!)
             }
+
+#if DEBUG
+            Section("Local Pro Testing") {
+                Toggle(
+                    "Unlock Pro locally on this device",
+                    isOn: Binding(
+                        get: { subscriptionStore.isLocalTestingProOverrideEnabled },
+                        set: { newValue in
+                            subscriptionStore.setLocalTestingProOverride(newValue)
+                            userSessionManager.syncSubscriptionState()
+                        }
+                    )
+                )
+
+                Text("Use this only while StoreKit and App Store Connect are not fully live. It unlocks Pro features locally without requiring a real purchase.")
+                    .font(.footnote)
+                    .foregroundStyle(AppTheme.textSecondary)
+            }
+#endif
 
             Section("AI Provider") {
                 Picker("Provider mode", selection: $viewModel.providerMode) {

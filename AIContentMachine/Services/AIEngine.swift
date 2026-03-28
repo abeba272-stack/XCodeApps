@@ -102,6 +102,7 @@ struct RemoteAIClient: AIClient {
 struct LocalPromptBuilder: PromptBuilder {
     func makePrompt(from request: GenerationRequest) -> String {
         """
+        \(request.userContext.isEmpty ? "" : "User Context:\n\(request.userContext)\n\n")
         Topic: \(request.topic)
         Platform: \(request.platform.rawValue)
         Category: \(request.category)

@@ -123,8 +123,11 @@ final class SwiftDataStore: PersistenceService, SettingsService {
 
     func loadDraft(profile: UserProfile, settings: AppSettings) -> SettingsDraft {
         SettingsDraft(
+            email: profile.email,
             creatorName: profile.creatorName,
             nichesText: profile.selectedNiches.joined(separator: ", "),
+            defaultAudience: profile.defaultAudience,
+            persistentPromptNotes: profile.persistentPromptNotes,
             selectedPlatforms: Set(profile.preferredPlatformEnums),
             selectedLanguage: profile.preferredLanguage,
             selectedTone: profile.preferredTone,
@@ -142,6 +145,10 @@ final class SwiftDataStore: PersistenceService, SettingsService {
             .split(separator: ",")
             .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
             .filter { !$0.isEmpty }
+        profile.defaultAudience = draft.defaultAudience.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+            ? "Creators who want better short-form content"
+            : draft.defaultAudience.trimmingCharacters(in: .whitespacesAndNewlines)
+        profile.persistentPromptNotes = draft.persistentPromptNotes.trimmingCharacters(in: .whitespacesAndNewlines)
         profile.preferredPlatforms = draft.selectedPlatforms.map(\.rawValue).sorted()
         profile.preferredLanguage = draft.selectedLanguage
         profile.preferredTone = draft.selectedTone

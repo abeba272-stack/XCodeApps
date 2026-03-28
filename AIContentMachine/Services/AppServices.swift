@@ -30,8 +30,11 @@ protocol ContentGenerationServiceFactory: Sendable {
 }
 
 struct SettingsDraft {
+    var email: String
     var creatorName: String
     var nichesText: String
+    var defaultAudience: String
+    var persistentPromptNotes: String
     var selectedPlatforms: Set<ContentPlatform>
     var selectedLanguage: ContentLanguage
     var selectedTone: ContentTone

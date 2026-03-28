@@ -117,6 +117,88 @@ enum ContentLanguage: String, CaseIterable, Codable, Identifiable {
     }
 }
 
+enum AppLanguage: String, CaseIterable, Codable, Identifiable {
+    case german = "de"
+    case english = "en"
+    case spanish = "es"
+
+    var id: String { rawValue }
+
+    var code: String {
+        rawValue
+    }
+
+    var displayName: String {
+        switch self {
+        case .german: "Deutsch"
+        case .english: "English"
+        case .spanish: "Espanol"
+        }
+    }
+
+    var localeIdentifier: String {
+        switch self {
+        case .german: "de_DE"
+        case .english: "en_US"
+        case .spanish: "es_ES"
+        }
+    }
+
+    static func systemDefault(locale: Locale = .current) -> AppLanguage {
+        let identifier = locale.language.languageCode?.identifier.lowercased()
+
+        switch identifier {
+        case "de":
+            return .german
+        case "es":
+            return .spanish
+        case "en":
+            return .english
+        default:
+            return .english
+        }
+    }
+}
+
+enum PreferredAccountLanguage: String, CaseIterable, Codable, Identifiable {
+    case german = "de"
+    case english = "en"
+    case spanish = "es"
+
+    var id: String { rawValue }
+
+    var code: String {
+        rawValue
+    }
+
+    var displayName: String {
+        switch self {
+        case .german: "Deutsch"
+        case .english: "English"
+        case .spanish: "Espanol"
+        }
+    }
+
+    var localeIdentifier: String {
+        switch self {
+        case .german: "de_DE"
+        case .english: "en_US"
+        case .spanish: "es_ES"
+        }
+    }
+}
+
+extension PreferredAccountLanguage {
+    init(contentLanguage: ContentLanguage) {
+        switch contentLanguage {
+        case .german:
+            self = .german
+        case .english:
+            self = .english
+        }
+    }
+}
+
 enum ContentStyle: String, CaseIterable, Codable, Identifiable {
     case hotTake = "Hot Take"
     case storytime = "Storytime"

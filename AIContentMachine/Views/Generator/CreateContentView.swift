@@ -31,6 +31,10 @@ struct CreateContentView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
                 headerCard
+                if let quickStart = viewModel.selectedTemplate?.quickStartBrief,
+                   let selectedTemplate = viewModel.selectedTemplate {
+                    readyBriefCard(template: selectedTemplate, quickStart: quickStart)
+                }
                 generatorForm
 
                 if let errorMessage = viewModel.errorMessage {
@@ -187,7 +191,7 @@ struct CreateContentView: View {
                 VStack(alignment: .leading, spacing: 16) {
                     SectionHeaderView(
                         title: "Template boost",
-                        subtitle: "Optional reusable framing to make the generated structure more intentional.",
+                        subtitle: "Optional reusable framing. Pro templates can also preload a complete ready-to-run brief.",
                         eyebrow: "Framework"
                     )
 
@@ -361,6 +365,9 @@ struct CreateContentView: View {
                         .lineLimit(4)
 
                     HStack(spacing: 8) {
+                        if template.hasReadyToUseSuggestion {
+                            miniMetaPill(title: "Instant", selected: isSelected)
+                        }
                         if let firstPlatform = template.idealPlatforms.first {
                             miniMetaPill(title: firstPlatform.rawValue, selected: isSelected)
                         }
@@ -400,6 +407,47 @@ struct CreateContentView: View {
                 Capsule(style: .continuous)
                     .fill(selected ? Color.white.opacity(0.26) : AppTheme.surfaceMuted)
             )
+    }
+
+    private func readyBriefCard(template: TemplateModel, quickStart: TemplateQuickStart) -> some View {
+        GlassCard {
+            VStack(alignment: .leading, spacing: 14) {
+                SectionHeaderView(
+                    title: "Ready-to-run Pro suggestion",
+                    subtitle: "This template already loaded a usable example brief. Generate immediately or edit the fields below first.",
+                    eyebrow: "Instant"
+                )
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Topic")
+                        .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        .foregroundStyle(AppTheme.textMuted)
+                    Text(quickStart.topic)
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(AppTheme.textPrimary)
+                }
+
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Audience")
+                        .font(.system(size: 12, weight: .heavy, design: .rounded))
+                        .foregroundStyle(AppTheme.textMuted)
+                    Text(quickStart.audience)
+                        .font(.system(size: 14, weight: .medium, design: .rounded))
+                        .foregroundStyle(AppTheme.textSecondary)
+                }
+
+                HStack(spacing: 10) {
+                    miniMetaPill(title: quickStart.category, selected: false)
+                    miniMetaPill(title: "\(Int(quickStart.durationSeconds))s", selected: false)
+                    miniMetaPill(title: template.recommendedStyle.rawValue, selected: false)
+                }
+
+                Button("Reload This Suggestion") {
+                    viewModel.applyTemplate(template)
+                }
+                .buttonStyle(AppSecondaryButtonStyle())
+            }
+        }
     }
 
     private func errorCard(message: String) -> some View {

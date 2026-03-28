@@ -84,6 +84,11 @@
 		AA100000000000000000000D /* PaywallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200000000000000000000D /* PaywallView.swift */; };
 		AA100000000000000000000E /* FeatureAccessPolicyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200000000000000000000E /* FeatureAccessPolicyTests.swift */; };
 		AA100000000000000000000F /* TemplateEngineCatalogTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA200000000000000000000F /* TemplateEngineCatalogTests.swift */; };
+		AA1000000000000000000011 /* AuthModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000011 /* AuthModels.swift */; };
+		AA1000000000000000000012 /* AuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000012 /* AuthService.swift */; };
+		AA1000000000000000000013 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000013 /* AuthViewModel.swift */; };
+		AA1000000000000000000014 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000014 /* AuthView.swift */; };
+		AA1000000000000000000015 /* LanguageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000015 /* LanguageService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -177,6 +182,11 @@
 		AA200000000000000000000E /* FeatureAccessPolicyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FeatureAccessPolicyTests.swift; sourceTree = "<group>"; };
 		AA200000000000000000000F /* TemplateEngineCatalogTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplateEngineCatalogTests.swift; sourceTree = "<group>"; };
 		AA2000000000000000000010 /* AIContentMachine.storekit */ = {isa = PBXFileReference; lastKnownFileType = text.json; path = AIContentMachine.storekit; sourceTree = "<group>"; };
+		AA2000000000000000000011 /* AuthModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthModels.swift; sourceTree = "<group>"; };
+		AA2000000000000000000012 /* AuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthService.swift; sourceTree = "<group>"; };
+		AA2000000000000000000013 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
+		AA2000000000000000000014 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
+		AA2000000000000000000015 /* LanguageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -184,11 +194,13 @@
 			isa = PBXGroup;
 			children = (
 				AA2000000000000000000007 /* AIEngine.swift */,
+				AA2000000000000000000012 /* AuthService.swift */,
 				AA2000000000000000000006 /* AppServices.swift */,
 				349D2EA3E0D1770CEA0F6FDA /* ContentGenerationService.swift */,
 				249109F202CB8DF3AA23734F /* CopyExportService.swift */,
 				AA2000000000000000000008 /* DefaultAppServices.swift */,
 				AA200000000000000000000A /* FeatureAccessController.swift */,
+				AA2000000000000000000015 /* LanguageService.swift */,
 				235B1CBBC3110B7E8408905D /* MockContentGenerationService.swift */,
 				AA2000000000000000000005 /* NetworkClient.swift */,
 				D23F9165B51DB411C7A7774E /* PlannerService.swift */,
@@ -246,6 +258,7 @@
 			children = (
 				482DC5BC426867F2E4B4D7B6 /* AppEnums.swift */,
 				2B7F1A6D0EE9841F70B9A1B5 /* AppSettings.swift */,
+				AA2000000000000000000011 /* AuthModels.swift */,
 				C217DB9306776DC8C8678EF4 /* ContentProject.swift */,
 				AA2000000000000000000004 /* GenerationSession.swift */,
 				2CF12D0AEF5B996D4A8B98D5 /* GenerationModels.swift */,
@@ -335,6 +348,7 @@
 		D975CF222FB8CB3DE20A39A6 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				AA3000000000000000000014 /* Auth */,
 				498E379D4D6FF422AB979030 /* RootView.swift */,
 				D1A1C1F43A3CAD2408F66EBB /* Dashboard */,
 				E21B101A77F8507F603E699A /* Generator */,
@@ -350,6 +364,7 @@
 		DC1B2F4D28755C55C4B09916 /* ViewModels */ = {
 			isa = PBXGroup;
 			children = (
+				AA2000000000000000000013 /* AuthViewModel.swift */,
 				792649E33566CFEDF2C2C360 /* ContentGeneratorViewModel.swift */,
 				E83057CF65AC9DDF9321F989 /* ContentLibraryViewModel.swift */,
 				8E0132702672EC6ECF4DC7FF /* DashboardViewModel.swift */,
@@ -359,6 +374,14 @@
 				90ED35C8F2876DFA93E03139 /* TemplatesViewModel.swift */,
 			);
 			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		AA3000000000000000000014 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				AA2000000000000000000014 /* AuthView.swift */,
+			);
+			path = Auth;
 			sourceTree = "<group>";
 		};
 		DD0267764B945E4FDE5DA2BC /* Tests */ = {
@@ -456,6 +479,11 @@
 					};
 					42F99BD0306F2900E23F0A6A = {
 						ProvisioningStyle = Automatic;
+						SystemCapabilities = {
+							com.apple.SignInWithApple = {
+								enabled = 1;
+							};
+						};
 					};
 				};
 			};
@@ -502,6 +530,10 @@
 				7C899BB286C711C0B3B31E77 /* AppEnums.swift in Sources */,
 				AA1000000000000000000002 /* AppError.swift in Sources */,
 				AA1000000000000000000003 /* AppLogger.swift in Sources */,
+				AA1000000000000000000011 /* AuthModels.swift in Sources */,
+				AA1000000000000000000012 /* AuthService.swift in Sources */,
+				AA1000000000000000000014 /* AuthView.swift in Sources */,
+				AA1000000000000000000013 /* AuthViewModel.swift in Sources */,
 				AA1000000000000000000006 /* AppServices.swift in Sources */,
 				4C0B40F3E79AC6FC5902A65D /* AppSettings.swift in Sources */,
 				C56456F8BF45112832AFD99B /* BatchIdeasView.swift in Sources */,
@@ -529,6 +561,7 @@
 				5E86C6CC28F24D3849676934 /* GlassCard.swift in Sources */,
 				68138A572EA84DBFEFBCBECC /* GoalSelectionView.swift in Sources */,
 				061D0FFBECC582494D287322 /* LanguageSelectionView.swift in Sources */,
+				AA1000000000000000000015 /* LanguageService.swift in Sources */,
 				BC5596AF0DC7712A6EA19ED7 /* MetricCard.swift in Sources */,
 				998B69D4C2D4E69D77D7E248 /* MockContentGenerationService.swift in Sources */,
 				AA1000000000000000000009 /* MonetizationModels.swift in Sources */,

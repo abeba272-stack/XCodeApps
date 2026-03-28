@@ -26,9 +26,11 @@ final class ContentGeneratorViewModel: ObservableObject {
     private let duplicateProjectUseCase: DuplicateProjectUseCase
     private let persistenceService: any PersistenceService
     private let exportService: any ExportService
+    private let userPreferencesService: any UserPreferencesService
     private let featureAccessController: FeatureAccessController
     private let paywallController: PaywallController
     private let logger: any AppLogger
+    private var userContext: String = ""
 
     private(set) var latestRequest: GenerationRequest?
 
@@ -39,6 +41,7 @@ final class ContentGeneratorViewModel: ObservableObject {
         duplicateProjectUseCase: DuplicateProjectUseCase,
         persistenceService: any PersistenceService,
         exportService: any ExportService,
+        userPreferencesService: any UserPreferencesService,
         featureAccessController: FeatureAccessController,
         paywallController: PaywallController,
         logger: any AppLogger
@@ -49,6 +52,7 @@ final class ContentGeneratorViewModel: ObservableObject {
         self.duplicateProjectUseCase = duplicateProjectUseCase
         self.persistenceService = persistenceService
         self.exportService = exportService
+        self.userPreferencesService = userPreferencesService
         self.featureAccessController = featureAccessController
         self.paywallController = paywallController
         self.logger = logger
@@ -60,8 +64,11 @@ final class ContentGeneratorViewModel: ObservableObject {
         tone = profile.preferredTone
         language = profile.preferredLanguage
         goal = profile.goalEnums.first ?? .views
+        userContext = userPreferencesService.promptContext(for: profile)
         if audience.isEmpty {
-            audience = "Creators who want better short-form content"
+            audience = profile.defaultAudience.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                ? "Creators who want better short-form content"
+                : profile.defaultAudience
         }
     }
 
@@ -77,7 +84,8 @@ final class ContentGeneratorViewModel: ObservableObject {
             style: style,
             durationSeconds: Int(durationSeconds),
             mode: mode,
-            template: selectedTemplate
+            template: selectedTemplate,
+            userContext: userContext
         )
 
         if request.topic.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
@@ -232,7 +240,13 @@ final class ContentGeneratorViewModel: ObservableObject {
         goal = template.recommendedGoal
         style = template.recommendedStyle
 
-        if category.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || category == "General" {
+        if let quickStart = template.quickStartBrief {
+            topic = quickStart.topic
+            audience = quickStart.audience
+            category = quickStart.category
+            mode = quickStart.mode
+            durationSeconds = quickStart.durationSeconds
+        } else if category.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || category == "General" {
             category = template.category
         }
     }

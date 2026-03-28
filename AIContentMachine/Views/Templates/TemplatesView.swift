@@ -58,7 +58,7 @@ struct TemplatesView: View {
             VStack(alignment: .leading, spacing: 12) {
                 SectionHeaderView(
                     title: "Templates",
-                    subtitle: "High-signal creator formats you can use immediately instead of starting from a blank brief.",
+                    subtitle: "High-signal creator formats. Pro templates now include ready-to-run suggestions you can generate without writing the brief first.",
                     eyebrow: "Frameworks",
                     actionTitle: subscriptionStore.isPro ? nil : "Upgrade",
                     action: subscriptionStore.isPro ? nil : { paywallController.present(PaywallContext(reason: .dashboardUpgrade)) }
@@ -184,6 +184,14 @@ struct TemplatesView: View {
                     )
                 }
 
+                if let quickStart = template.quickStartBrief {
+                    insightBlock(
+                        title: "Ready-to-use suggestion",
+                        body: quickStart.topic,
+                        fallback: nil
+                    )
+                }
+
                 if isLocked {
                     Button {
                         useTemplate(template)
@@ -192,7 +200,7 @@ struct TemplatesView: View {
                     }
                     .buttonStyle(AppSecondaryButtonStyle())
                 } else {
-                    Button("Use Template") {
+                    Button(template.hasReadyToUseSuggestion ? "Use Ready Brief" : "Use Template") {
                         useTemplate(template)
                     }
                     .buttonStyle(AppPrimaryButtonStyle())

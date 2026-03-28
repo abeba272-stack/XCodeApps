@@ -14,6 +14,7 @@ struct GenerationRequest: Hashable {
     var templateName: String?
     var templateDescription: String?
     var templateRules: [String]
+    var userContext: String
 
     init(
         topic: String,
@@ -26,7 +27,8 @@ struct GenerationRequest: Hashable {
         style: ContentStyle,
         durationSeconds: Int,
         mode: GenerationMode,
-        template: TemplateModel? = nil
+        template: TemplateModel? = nil,
+        userContext: String = ""
     ) {
         self.topic = topic
         self.platform = platform
@@ -41,6 +43,7 @@ struct GenerationRequest: Hashable {
         self.templateName = template?.name
         self.templateDescription = template?.templateDescription
         self.templateRules = template?.structureRules ?? []
+        self.userContext = userContext
     }
 
     var durationLabel: String {
@@ -91,6 +94,9 @@ struct UserProfileSnapshot: Codable {
     var goals: [String]
     var postingFrequency: Int
     var onboardingCompleted: Bool
+    var creatorName: String
+    var defaultAudience: String
+    var persistentPromptNotes: String
 }
 
 struct AppSettingsSnapshot: Codable {

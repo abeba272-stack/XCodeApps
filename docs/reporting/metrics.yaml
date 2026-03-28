@@ -1,0 +1,15 @@
+# Manual operating metrics for the daily morning report.
+# Leave unknown values blank; the report generator will mark them as "not evidenced".
+
+date: ""
+active_users: ""
+installs_or_downloads: ""
+trials_or_subscribers: ""
+conversion_rate: ""
+retention: ""
+recent_feedback_themes:
+  - ""
+support_volume: ""
+acquisition_performance: ""
+cost_per_generation: ""
+cost_per_active_user: ""

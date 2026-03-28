@@ -19,6 +19,7 @@ struct AIContentMachineApp: App {
             RootView(container: appContainer)
                 .environmentObject(themeManager)
                 .environmentObject(appContainer.subscriptionStore)
+                .environmentObject(appContainer.userSessionManager)
                 .environmentObject(appContainer.featureAccessController)
                 .environmentObject(appContainer.paywallController)
                 .preferredColorScheme(themeManager.colorScheme)

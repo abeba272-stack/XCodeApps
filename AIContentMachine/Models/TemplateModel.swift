@@ -107,6 +107,14 @@ extension TemplateModel {
         tier.rawValue
     }
 
+    var quickStartBrief: TemplateQuickStart? {
+        TemplateEngine.quickStart(for: self)
+    }
+
+    var hasReadyToUseSuggestion: Bool {
+        quickStartBrief != nil
+    }
+
     func applyStarterContent(from template: TemplateModel) {
         seedKey = template.seedKey
         name = template.name

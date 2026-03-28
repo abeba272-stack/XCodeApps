@@ -1,0 +1,23 @@
+# Manual business and market context for the daily morning report.
+# Leave unknown values blank; the report generator will mark them as "not evidenced".
+
+product_summary: ""
+target_audience:
+  - ""
+core_problem_solved: ""
+pricing:
+  free_tier: ""
+  pro_monthly: ""
+  pro_yearly: ""
+  free_vs_pro_summary: ""
+paywall_conversion_thesis: ""
+distribution_channels:
+  - ""
+competition:
+  - ""
+moat_or_advantage: ""
+vision_12_months: ""
+vision_24_months: ""
+vision_36_months: ""
+current_top_risks:
+  - ""

@@ -1,3 +1,5 @@
 .DS_Store
 .vscode/
 AIContentMachine.xcodeproj/project.xcworkspace/xcuserdata/
+__pycache__/
+*.pyc

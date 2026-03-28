@@ -15,11 +15,6 @@ enum AppBootstrapper {
     ]
 
     static func bootstrap(in context: ModelContext) throws {
-        let profiles = try context.fetch(FetchDescriptor<UserProfile>())
-        if profiles.isEmpty {
-            context.insert(UserProfile())
-        }
-
         let settings = try context.fetch(FetchDescriptor<AppSettings>())
         let activeSettings: AppSettings
         if let existingSettings = settings.first {
@@ -28,6 +23,15 @@ enum AppBootstrapper {
             let newSettings = AppSettings()
             context.insert(newSettings)
             activeSettings = newSettings
+        }
+
+        if activeSettings.appLanguageRaw.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            activeSettings.appLanguage = .systemDefault()
+        }
+
+        let profiles = try context.fetch(FetchDescriptor<UserProfile>())
+        for profile in profiles where profile.preferredAccountLanguageRaw.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            profile.preferredAccountLanguage = PreferredAccountLanguage(contentLanguage: profile.preferredLanguage)
         }
 
         TemplateSeedService.seedStarterTemplates(in: context, settings: activeSettings)

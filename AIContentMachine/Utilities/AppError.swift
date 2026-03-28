@@ -1,3 +1,4 @@
+import AuthenticationServices
 import Foundation
 
 enum NetworkFailure: Error, LocalizedError, Equatable {
@@ -75,6 +76,29 @@ extension AppError {
                 return .settings(message)
             case .providerFailure(let message):
                 return .ai(message)
+            }
+        }
+
+        if let authError = error as? ASAuthorizationError {
+            switch authError.code {
+            case .canceled:
+                return .validation("Apple Sign-In was cancelled.")
+            case .failed:
+                return .validation("Apple Sign-In is not available in this simulator session. Sign into an Apple ID in the Simulator Settings or use email sign-in.")
+            case .invalidResponse:
+                return .validation("Apple Sign-In returned an invalid response. Try again or use email sign-in.")
+            case .notHandled:
+                return .validation("Apple Sign-In could not be completed right now. Try again or use email sign-in.")
+            case .unknown:
+                return .validation("Apple Sign-In is currently unavailable. Use email sign-in or check the Simulator Apple ID settings.")
+            case .matchedExcludedCredential:
+                return .validation("This Apple account cannot be used for sign-in here. Try another method.")
+            case .credentialImport:
+                return .validation("Apple credentials could not be imported. Try again or use email sign-in.")
+            case .credentialExport:
+                return .validation("Apple credentials could not be exported. Try again or use email sign-in.")
+            @unknown default:
+                return .validation("Apple Sign-In is currently unavailable. Use email sign-in or try again later.")
             }
         }
 

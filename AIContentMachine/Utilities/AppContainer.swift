@@ -8,8 +8,12 @@ final class AppContainer: ObservableObject {
     let persistenceService: any PersistenceService
     let exportService: any ExportService
     let settingsService: any SettingsService
+    let languageService: any LanguageService
     let contentGenerationFactory: any ContentGenerationServiceFactory
+    let authService: any AuthService
+    let userPreferencesService: any UserPreferencesService
     let subscriptionStore: SubscriptionStore
+    let userSessionManager: UserSessionManager
     let featureAccessController: FeatureAccessController
     let paywallController: PaywallController
 
@@ -27,8 +31,16 @@ final class AppContainer: ObservableObject {
         let networkClient = URLSessionNetworkClient(logger: logger)
         let dataStore = SwiftDataStore(modelContainer: modelContainer, logger: logger)
         let exportService = DefaultExportService()
+        let languageService = DefaultLanguageService(modelContainer: modelContainer, logger: logger)
         let generationFactory = DefaultContentGenerationServiceFactory(networkClient: networkClient, logger: logger)
         let subscriptionStore = SubscriptionStore(logger: logger)
+        let authService = SwiftDataAuthService(modelContainer: modelContainer, logger: logger)
+        let userPreferencesService = DefaultUserPreferencesService()
+        let userSessionManager = UserSessionManager(
+            authService: authService,
+            subscriptionStore: subscriptionStore,
+            logger: logger
+        )
         let featureAccessController = FeatureAccessController(
             modelContainer: modelContainer,
             subscriptionStore: subscriptionStore,
@@ -41,8 +53,12 @@ final class AppContainer: ObservableObject {
         self.persistenceService = dataStore
         self.exportService = exportService
         self.settingsService = dataStore
+        self.languageService = languageService
         self.contentGenerationFactory = generationFactory
+        self.authService = authService
+        self.userPreferencesService = userPreferencesService
         self.subscriptionStore = subscriptionStore
+        self.userSessionManager = userSessionManager
         self.featureAccessController = featureAccessController
         self.paywallController = paywallController
 
@@ -64,6 +80,7 @@ final class AppContainer: ObservableObject {
             duplicateProjectUseCase: duplicateProjectUseCase,
             persistenceService: persistenceService,
             exportService: exportService,
+            userPreferencesService: userPreferencesService,
             featureAccessController: featureAccessController,
             paywallController: paywallController,
             logger: logger
@@ -78,6 +95,10 @@ final class AppContainer: ObservableObject {
             persistenceService: persistenceService,
             logger: logger
         )
+    }
+
+    func makeAuthViewModel() -> AuthViewModel {
+        AuthViewModel(sessionManager: userSessionManager, logger: logger)
     }
 
     func makePlannerViewModel() -> PlannerViewModel {
