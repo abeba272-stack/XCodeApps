@@ -98,7 +98,7 @@ final class AppContainer: ObservableObject {
     }
 
     func makeAuthViewModel() -> AuthViewModel {
-        AuthViewModel(sessionManager: userSessionManager, logger: logger)
+        AuthViewModel(sessionManager: userSessionManager)
     }
 
     func makePlannerViewModel() -> PlannerViewModel {

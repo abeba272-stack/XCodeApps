@@ -1,4 +1,3 @@
-import AuthenticationServices
 import SwiftUI
 
 struct AuthView: View {
@@ -136,22 +135,6 @@ struct AuthView: View {
                     subtitle: "Use a connected identity provider when it is fully configured for this build.",
                     eyebrow: "Identity"
                 )
-
-                if viewModel.isAppleSignInEnabled {
-                    SignInWithAppleButton(.continue) { request in
-                        request.requestedScopes = [.fullName, .email]
-                    } onCompletion: { result in
-                        Task { await viewModel.handleAppleCompletion(result) }
-                    }
-                    .signInWithAppleButtonStyle(.white)
-                    .frame(height: 52)
-                    .clipShape(RoundedRectangle(cornerRadius: AppTheme.radiusMedium, style: .continuous))
-
-                    Text(viewModel.appleButtonSubtitle)
-                        .font(.system(size: 11, weight: .medium, design: .rounded))
-                        .foregroundStyle(AppTheme.textMuted)
-                        .padding(.top, -6)
-                }
 
                 if viewModel.isGoogleSignInEnabled {
                     Button {
