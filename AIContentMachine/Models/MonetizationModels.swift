@@ -30,9 +30,9 @@ enum SubscriptionProductID: String, CaseIterable {
     var marketingTitle: String {
         switch self {
         case .monthly:
-            return "AI Content Machine Pro Monthly"
+            return "ACM Pro Monthly"
         case .yearly:
-            return "AI Content Machine Pro Yearly"
+            return "ACM Pro Yearly"
         }
     }
 

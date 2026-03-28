@@ -14,13 +14,13 @@
       "localizations" : [
         {
           "description" : "Unlock Pro templates, unlimited generations, Batch Ideas, Local AI Server mode, and premium export tools.",
-          "displayName" : "AI Content Machine Pro Monthly",
+          "displayName" : "ACM Pro Monthly",
           "locale" : "en_US"
         }
       ],
       "productID" : "com.abebait.aicontentmachine.pro.monthly",
       "recurringSubscriptionPeriod" : "P1M",
-      "referenceName" : "AI Content Machine Pro Monthly",
+      "referenceName" : "ACM Pro Monthly",
       "subscriptionGroupID" : "pro-subscriptions",
       "type" : "RecurringSubscription"
     },
@@ -30,14 +30,14 @@
       "internalID" : "pro-yearly",
       "localizations" : [
         {
-          "description" : "Best value yearly plan for creators using AI Content Machine every week.",
-          "displayName" : "AI Content Machine Pro Yearly",
+          "description" : "Best value yearly plan for creators using ACM every week.",
+          "displayName" : "ACM Pro Yearly",
           "locale" : "en_US"
         }
       ],
       "productID" : "com.abebait.aicontentmachine.pro.yearly",
       "recurringSubscriptionPeriod" : "P1Y",
-      "referenceName" : "AI Content Machine Pro Yearly",
+      "referenceName" : "ACM Pro Yearly",
       "subscriptionGroupID" : "pro-subscriptions",
       "type" : "RecurringSubscription"
     }
@@ -51,10 +51,10 @@
       "localizations" : [
         {
           "locale" : "en_US",
-          "name" : "AI Content Machine Pro"
+          "name" : "ACM Pro"
         }
       ],
-      "name" : "AI Content Machine Pro",
+      "name" : "ACM Pro",
       "subscriptions" : [
         "pro-monthly",
         "pro-yearly"

@@ -30,7 +30,7 @@ struct PaywallView: View {
                 .padding(.bottom, 28)
             }
         }
-        .navigationTitle("AI Content Machine Pro")
+        .navigationTitle("ACM Pro")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
@@ -206,7 +206,7 @@ struct PaywallView: View {
                 HStack(alignment: .top) {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 8) {
-                            Text(productID.marketingTitle.replacingOccurrences(of: "AI Content Machine Pro ", with: ""))
+                            Text(productID.marketingTitle.replacingOccurrences(of: "ACM Pro ", with: ""))
                                 .font(.system(size: 18, weight: .bold, design: .rounded))
                                 .foregroundStyle(isSelected ? Color.black : AppTheme.textPrimary)
                             if isHighlighted {

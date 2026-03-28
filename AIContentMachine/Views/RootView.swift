@@ -308,7 +308,7 @@ private struct AppLaunchView: View {
                     .shadow(color: AppTheme.accentGlow.opacity(0.24), radius: 20, x: 0, y: 10)
 
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("AI Content Machine")
+                        Text("ACM")
                             .font(.system(size: 30, weight: .bold, design: .rounded))
                             .foregroundStyle(AppTheme.textPrimary)
                         Text("A calm start before the studio opens")

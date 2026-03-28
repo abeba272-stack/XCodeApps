@@ -131,7 +131,7 @@ struct SettingsView: View {
                 }
             }
 
-            Section(subscriptionStore.isPro ? "AI Content Machine Pro" : "Upgrade to Pro") {
+            Section(subscriptionStore.isPro ? "ACM Pro" : "Upgrade to Pro") {
                 LabeledContent("Plan") {
                     Text(subscriptionStore.entitlementTier.displayName)
                         .foregroundStyle(subscriptionStore.isPro ? AppTheme.success : AppTheme.textSecondary)

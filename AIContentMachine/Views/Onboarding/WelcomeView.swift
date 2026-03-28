@@ -12,7 +12,7 @@ struct WelcomeView: View {
                     Text("Create better content faster")
                         .font(.system(size: 34, weight: .bold, design: .rounded))
                         .foregroundStyle(AppTheme.textPrimary)
-                    Text("AI Content Machine turns your niche, audience, tone, and goal into actual posting-ready content packages. Start with a few preferences and land in a working creator dashboard.")
+                    Text("ACM turns your niche, audience, tone, and goal into actual posting-ready content packages. Start with a few preferences and land in a working creator dashboard.")
                         .font(.system(size: 16, weight: .medium, design: .rounded))
                         .foregroundStyle(AppTheme.textSecondary)
                     TextField("Your creator name", text: $viewModel.creatorName)

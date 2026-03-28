@@ -48,7 +48,7 @@ struct OnboardingContainerView: View {
     private var progressHeader: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("AI Content Machine")
+                Text("ACM")
                     .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundStyle(AppTheme.textPrimary)
                 Spacer()

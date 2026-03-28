@@ -1,4 +1,4 @@
-# AI Content Machine Store Setup Checklist
+# ACM Store Setup Checklist
 
 This checklist covers the external steps that still need to be completed outside the codebase for subscriptions and App Store readiness.
 
@@ -6,7 +6,7 @@ This checklist covers the external steps that still need to be completed outside
 
 - Create the app record for the production bundle identifier.
 - Create the subscription group:
-  - `AI Content Machine Pro`
+  - `ACM Pro`
 - Create these auto-renewable subscriptions:
   - `com.abebait.aicontentmachine.pro.monthly`
   - `com.abebait.aicontentmachine.pro.yearly`
