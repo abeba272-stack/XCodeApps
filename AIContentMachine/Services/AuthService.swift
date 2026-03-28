@@ -97,8 +97,7 @@ final class SwiftDataAuthService: AuthService {
             throw AppError.validation("Enter your email and password to continue.")
         }
 
-        if normalizedEmail == AuthConstants.specialProEmail.lowercased(),
-           trimmedPassword == AuthConstants.specialProPassword {
+        if isDebugSpecialProLogin(email: normalizedEmail, password: trimmedPassword) {
             return try upsertSpecialUser()
         }
 
@@ -222,6 +221,7 @@ final class SwiftDataAuthService: AuthService {
     }
 
     private func upsertSpecialUser() throws -> UserProfile {
+#if DEBUG
         let context = modelContainer.mainContext
         let settings = try loadOrCreateSettings(in: context)
         let email = AuthConstants.specialProEmail.lowercased()
@@ -251,6 +251,9 @@ final class SwiftDataAuthService: AuthService {
         settings.currentUserID = user.id
         try save(context, fallback: "The special Pro account could not be activated.")
         return user
+#else
+        throw AppError.validation("The special Pro account is only available in local debug builds.")
+#endif
     }
 
     private func migrateLegacyProfileIfNeeded(settings: AppSettings, context: ModelContext) throws -> UserProfile? {
@@ -303,6 +306,14 @@ final class SwiftDataAuthService: AuthService {
         let cleaned = base.replacingOccurrences(of: ".", with: " ").replacingOccurrences(of: "_", with: " ")
         let trimmed = cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
         return trimmed.isEmpty ? "Creator" : trimmed.capitalized
+    }
+
+    private func isDebugSpecialProLogin(email: String, password: String) -> Bool {
+#if DEBUG
+        email == AuthConstants.specialProEmail.lowercased() && password == AuthConstants.specialProPassword
+#else
+        false
+#endif
     }
 
     static func hashPassword(_ password: String, email: String) -> String {

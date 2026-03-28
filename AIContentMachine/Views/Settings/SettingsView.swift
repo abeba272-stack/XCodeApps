@@ -158,6 +158,12 @@ struct SettingsView: View {
                 Link("Manage Subscription", destination: URL(string: "https://apps.apple.com/account/subscriptions")!)
             }
 
+            Section("Legal & Support") {
+                Link("Terms of Service", destination: URL(string: "https://abeba272-stack.github.io/XCodeApps/terms.html")!)
+                Link("Privacy Policy", destination: URL(string: "https://abeba272-stack.github.io/XCodeApps/privacy.html")!)
+                Link("Support Email", destination: URL(string: "mailto:sundermannabeba@gmail.com")!)
+            }
+
 #if DEBUG
             Section("Local Pro Testing") {
                 Toggle(

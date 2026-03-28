@@ -8,7 +8,7 @@
   ],
   "products" : [
     {
-      "displayPrice" : "9.99",
+      "displayPrice" : "€7.99",
       "familyShareable" : false,
       "internalID" : "pro-monthly",
       "localizations" : [
@@ -25,7 +25,7 @@
       "type" : "RecurringSubscription"
     },
     {
-      "displayPrice" : "59.99",
+      "displayPrice" : "€59.99",
       "familyShareable" : false,
       "internalID" : "pro-yearly",
       "localizations" : [

@@ -39,9 +39,9 @@ enum SubscriptionProductID: String, CaseIterable {
     var marketingSubtitle: String {
         switch self {
         case .monthly:
-            return "Full Pro access with flexible month-to-month billing."
+            return "EUR 7.99 per month with full Pro access and flexible billing."
         case .yearly:
-            return "Best value for creators using the machine every week."
+            return "EUR 59.99 per year. Best value for creators using the machine every week."
         }
     }
 }

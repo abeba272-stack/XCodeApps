@@ -60,7 +60,9 @@ struct AuthProviderAvailability {
     }
 }
 
+#if DEBUG
 struct AuthConstants {
     static let specialProEmail = "abeba272@icloud.com"
     static let specialProPassword = "1900Ai+Gmg"
 }
+#endif

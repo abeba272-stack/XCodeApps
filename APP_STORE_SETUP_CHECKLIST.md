@@ -25,7 +25,11 @@ Decide and publish the final URLs for:
 - Terms of Service / Subscription Terms
 - Support / Contact page
 
-Current in-app paywall links still use generic Apple legal destinations for Terms/Privacy and the Apple subscriptions page for Manage Subscription.
+Final public destinations:
+
+- Privacy Policy: `https://abeba272-stack.github.io/XCodeApps/privacy.html`
+- Terms of Service: `https://abeba272-stack.github.io/XCodeApps/terms.html`
+- Support: `mailto:sundermannabeba@gmail.com`
 
 ## 3. Banking / Tax / Agreements
 
@@ -44,11 +48,11 @@ Current in-app paywall links still use generic Apple legal destinations for Term
 
 ## 5. Product Decisions To Confirm
 
-- Final monthly price
-- Final yearly price
-- Whether yearly should offer a visible discount message
-- Final legal copy for the paywall
-- Final support email or support URL
+- Final monthly price: `7,99 €`
+- Final yearly price: `59,99 €`
+- Yearly positioning: best value
+- Final legal copy for the paywall: still review once in-app copy is frozen
+- Final support email: `sundermannabeba@gmail.com`
 
 ## 6. QA Checklist
 

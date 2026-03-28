@@ -11,8 +11,9 @@ struct PaywallView: View {
     @State private var selectedProductID: SubscriptionProductID = .yearly
 
     private let manageSubscriptionsURL = URL(string: "https://apps.apple.com/account/subscriptions")!
-    private let termsURL = URL(string: "https://www.apple.com/legal/internet-services/itunes/dev/stdeula/")!
-    private let privacyURL = URL(string: "https://www.apple.com/legal/privacy/en-ww/")!
+    private let termsURL = URL(string: "https://abeba272-stack.github.io/XCodeApps/terms.html")!
+    private let privacyURL = URL(string: "https://abeba272-stack.github.io/XCodeApps/privacy.html")!
+    private let supportURL = URL(string: "mailto:sundermannabeba@gmail.com")!
 
     var body: some View {
         ZStack {
@@ -275,6 +276,8 @@ struct PaywallView: View {
                         .buttonStyle(AppQuietButtonStyle())
                     Link("Privacy", destination: privacyURL)
                         .buttonStyle(AppQuietButtonStyle())
+                    Link("Support", destination: supportURL)
+                        .buttonStyle(AppQuietButtonStyle())
                     Link("Manage", destination: manageSubscriptionsURL)
                         .buttonStyle(AppQuietButtonStyle())
                 }
@@ -293,9 +296,9 @@ struct PaywallView: View {
     private func fallbackPrice(for productID: SubscriptionProductID) -> String {
         switch productID {
         case .monthly:
-            return "Monthly"
+            return "€7.99"
         case .yearly:
-            return "Yearly"
+            return "€59.99"
         }
     }
 
