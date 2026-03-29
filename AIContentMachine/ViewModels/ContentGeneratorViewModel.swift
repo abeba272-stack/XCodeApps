@@ -148,10 +148,10 @@ final class ContentGeneratorViewModel: ObservableObject {
             applyGeneratedContent(generated, request: request)
             featureAccessController.recordSuccessfulGeneration(settings: settings)
 
-            if settings.providerMode == .customEndpoint, generated.origin == .providerFallback {
+            if settings.providerMode == .customEndpoint, generated.origin == .fallback {
                 infoMessage = request.language == .german
-                    ? "Der lokale AI-Server konnte nicht genutzt werden. Dein Entwurf wurde im Offline-Modus generiert."
-                    : "The local AI server could not be used. Your draft was generated in offline mode."
+                    ? "Der lokale AI-Server war nicht erreichbar. Dein Entwurf wurde mit dem Mock-Generator erstellt."
+                    : "The local AI server was unreachable. Your draft was generated with the mock generator."
             }
         } catch let error as GenerationError {
             switch error {

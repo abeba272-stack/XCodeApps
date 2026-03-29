@@ -43,16 +43,16 @@ struct AIEngine: ContentGenerationService {
         do {
             raw = try await client.send(prompt: prompt)
         } catch {
-            guard shouldFallbackToOffline(for: error) else {
+            guard shouldFallbackToMock(for: error) else {
                 throw error
             }
 
-            logger.warn("Custom endpoint failed, falling back to offline mode: \(error.localizedDescription)", category: "AIEngine")
+            logger.warn("Live generation failed due to provider reachability. Falling back to mock output: \(error.localizedDescription)", category: "AIEngine")
             return makeFallbackContent(from: baseline, for: request)
         }
 
         var parsed = try responseParser.parse(raw: raw, request: request, baseline: baseline)
-        parsed.origin = .provider
+        parsed.origin = .live
         return parsed
     }
 
@@ -62,15 +62,11 @@ struct AIEngine: ContentGenerationService {
 }
 
 private extension AIEngine {
-    func shouldFallbackToOffline(for error: Error) -> Bool {
+    func shouldFallbackToMock(for error: Error) -> Bool {
         switch error {
-        case is NetworkFailure:
+        case NetworkFailure.transport,
+             NetworkFailure.timedOut:
             return true
-        case let generationError as GenerationError:
-            if case .providerFailure = generationError {
-                return true
-            }
-            return false
         case is URLError:
             return true
         default:
@@ -81,11 +77,11 @@ private extension AIEngine {
     func makeFallbackContent(from baseline: GeneratedContent, for request: GenerationRequest) -> GeneratedContent {
         var fallbackContent = baseline
         let notice = request.language == .german
-            ? "Hinweis: Der lokale AI-Server konnte nicht genutzt werden. Dieser Entwurf wurde im Offline-Modus generiert."
-            : "Note: The local AI server could not be used. This draft was generated in offline mode."
+            ? "Hinweis: Der lokale AI-Server war nicht erreichbar. Dieser Entwurf wurde mit dem Mock-Generator erstellt."
+            : "Note: The local AI server was unreachable. This draft was generated with the mock generator."
 
         fallbackContent.notes = baseline.notes.isEmpty ? notice : "\(notice)\n\(baseline.notes)"
-        fallbackContent.origin = .providerFallback
+        fallbackContent.origin = .fallback
         return fallbackContent
     }
 }

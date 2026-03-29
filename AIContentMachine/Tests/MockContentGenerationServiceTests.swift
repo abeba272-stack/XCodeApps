@@ -129,7 +129,7 @@ final class AIEngineTests: XCTestCase {
 
         let content = try await engine.generateContent(for: makeRequest())
 
-        XCTAssertEqual(content.origin, .provider)
+        XCTAssertEqual(content.origin, .live)
         XCTAssertEqual(content.notes, "Parsed from provider")
     }
 
@@ -144,8 +144,8 @@ final class AIEngineTests: XCTestCase {
 
         let content = try await engine.generateContent(for: makeRequest(language: .english))
 
-        XCTAssertEqual(content.origin, .providerFallback)
-        XCTAssertTrue(content.notes.contains("offline mode"))
+        XCTAssertEqual(content.origin, .fallback)
+        XCTAssertTrue(content.notes.contains("mock generator"))
         XCTAssertTrue(content.notes.contains("Baseline note"))
     }
 
@@ -177,6 +177,23 @@ final class AIEngineTests: XCTestCase {
                 return XCTFail("Expected invalidSettings error, got \(error)")
             }
             XCTAssertEqual(message, "Missing configuration")
+        }
+    }
+
+    func testGenerateContentSurfacesProviderFailuresWithoutFallback() async {
+        let engine = AIEngine(
+            client: StubAIClient(result: .failure(GenerationError.providerFailure("Provider returned HTTP 500"))),
+            promptBuilder: StubPromptBuilder(),
+            responseParser: StubResponseParser(result: .success(makeGeneratedContent(notes: "Parsed"))),
+            baselineGenerator: StubBaselineGenerator(result: .success(makeGeneratedContent(notes: "Baseline"))),
+            logger: StubLogger()
+        )
+
+        await XCTAssertThrowsErrorAsync(try await engine.generateContent(for: makeRequest())) { error in
+            guard case GenerationError.providerFailure(let message) = error else {
+                return XCTFail("Expected providerFailure error, got \(error)")
+            }
+            XCTAssertEqual(message, "Provider returned HTTP 500")
         }
     }
 }

@@ -83,7 +83,7 @@ final class GenerationSession {
         postingChecklist: [String],
         postingTip: String,
         contentScore: Int,
-        generationOrigin: GenerationOrigin = .mock,
+        generationOrigin: GenerationOrigin = .fallback,
         hasSavedDraft: Bool = false
     ) {
         self.id = id
