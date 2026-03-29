@@ -90,6 +90,7 @@
 		AA1000000000000000000014 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000014 /* AuthView.swift */; };
 		AA1000000000000000000015 /* LanguageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000015 /* LanguageService.swift */; };
 		AA1000000000000000000016 /* OpenAIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000016 /* OpenAIClient.swift */; };
+		AA1000000000000000000017 /* AnthropicClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000017 /* AnthropicClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -189,6 +190,7 @@
 		AA2000000000000000000014 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		AA2000000000000000000015 /* LanguageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageService.swift; sourceTree = "<group>"; };
 		AA2000000000000000000016 /* OpenAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIClient.swift; sourceTree = "<group>"; };
+		AA2000000000000000000017 /* AnthropicClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnthropicClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -198,6 +200,7 @@
 				AA2000000000000000000007 /* AIEngine.swift */,
 				AA2000000000000000000012 /* AuthService.swift */,
 				AA2000000000000000000006 /* AppServices.swift */,
+				AA2000000000000000000017 /* AnthropicClient.swift */,
 				349D2EA3E0D1770CEA0F6FDA /* ContentGenerationService.swift */,
 				249109F202CB8DF3AA23734F /* CopyExportService.swift */,
 				AA2000000000000000000008 /* DefaultAppServices.swift */,
@@ -538,6 +541,7 @@
 				AA1000000000000000000014 /* AuthView.swift in Sources */,
 				AA1000000000000000000013 /* AuthViewModel.swift in Sources */,
 				AA1000000000000000000006 /* AppServices.swift in Sources */,
+				AA1000000000000000000017 /* AnthropicClient.swift in Sources */,
 				4C0B40F3E79AC6FC5902A65D /* AppSettings.swift in Sources */,
 				C56456F8BF45112832AFD99B /* BatchIdeasView.swift in Sources */,
 				DEA943BE5EED8095F4D0E1FE /* BestTimeHeuristic.swift in Sources */,
