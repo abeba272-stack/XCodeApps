@@ -21,7 +21,7 @@ struct ModelContainerProvider {
                 configurations: [Self.makePersistentConfiguration(schema: schema)]
             )
         } catch {
-            NSLog("Persistent ModelContainer creation failed. Falling back to in-memory store. Error: \(error.localizedDescription)")
+            Self.logPersistentContainerFallback(error)
 
             do {
                 container = try ModelContainer(
@@ -50,5 +50,13 @@ struct ModelContainerProvider {
 
         let storeURL = storeDirectory.appendingPathComponent("AIContentMachine.store")
         return ModelConfiguration("AIContentMachine", schema: schema, url: storeURL)
+    }
+
+    private static func logPersistentContainerFallback(_ error: Error) {
+#if DEBUG
+        NSLog("Persistent ModelContainer creation failed. Falling back to in-memory store. Error type: %@", String(describing: type(of: error)))
+#else
+        NSLog("Persistent ModelContainer creation failed. Falling back to in-memory store.")
+#endif
     }
 }
