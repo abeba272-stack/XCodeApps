@@ -89,6 +89,7 @@
 		AA1000000000000000000013 /* AuthViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000013 /* AuthViewModel.swift */; };
 		AA1000000000000000000014 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000014 /* AuthView.swift */; };
 		AA1000000000000000000015 /* LanguageService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000015 /* LanguageService.swift */; };
+		AA1000000000000000000016 /* OpenAIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA2000000000000000000016 /* OpenAIClient.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -187,6 +188,7 @@
 		AA2000000000000000000013 /* AuthViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthViewModel.swift; sourceTree = "<group>"; };
 		AA2000000000000000000014 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		AA2000000000000000000015 /* LanguageService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LanguageService.swift; sourceTree = "<group>"; };
+		AA2000000000000000000016 /* OpenAIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OpenAIClient.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -203,6 +205,7 @@
 				AA2000000000000000000015 /* LanguageService.swift */,
 				235B1CBBC3110B7E8408905D /* MockContentGenerationService.swift */,
 				AA2000000000000000000005 /* NetworkClient.swift */,
+				AA2000000000000000000016 /* OpenAIClient.swift */,
 				D23F9165B51DB411C7A7774E /* PlannerService.swift */,
 				6EDB2951DFA411CB4ABAF9CA /* RealAIContentService.swift */,
 				AA200000000000000000000B /* SubscriptionStore.swift */,
@@ -568,6 +571,7 @@
 				114D011D2ECFE18DC1D6C00B /* ModelContainerProvider.swift in Sources */,
 				AA1000000000000000000005 /* NetworkClient.swift in Sources */,
 				8D1395C8701A2DEC87D04234 /* NicheSelectionView.swift in Sources */,
+				AA1000000000000000000016 /* OpenAIClient.swift in Sources */,
 				5C04658ABC244769C375AA39 /* OnboardingContainerView.swift in Sources */,
 				2D0F71206A2587E11487639C /* OnboardingViewModel.swift in Sources */,
 				4919CF2496CC1C0F33EF09CB /* PlannerAssignment.swift in Sources */,
