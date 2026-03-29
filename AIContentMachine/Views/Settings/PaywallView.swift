@@ -10,11 +10,6 @@ struct PaywallView: View {
 
     @State private var selectedProductID: SubscriptionProductID = .yearly
 
-    private let manageSubscriptionsURL = URL(string: "https://apps.apple.com/account/subscriptions")!
-    private let termsURL = URL(string: "https://abeba272-stack.github.io/XCodeApps/terms.html")!
-    private let privacyURL = URL(string: "https://abeba272-stack.github.io/XCodeApps/privacy.html")!
-    private let supportURL = URL(string: "mailto:sundermannabeba@gmail.com")!
-
     var body: some View {
         ZStack {
             PremiumBackground()
@@ -164,8 +159,15 @@ struct PaywallView: View {
                 }
 
                 if subscriptionStore.isPro {
-                    Link("Manage Subscription", destination: manageSubscriptionsURL)
-                        .buttonStyle(AppSecondaryButtonStyle())
+                    if let manageSubscriptionsURL = AppExternalLinks.manageSubscriptionsURL {
+                        Link("Manage Subscription", destination: manageSubscriptionsURL)
+                            .buttonStyle(AppSecondaryButtonStyle())
+                    } else {
+                        Button("Manage Subscription unavailable") {}
+                            .buttonStyle(AppSecondaryButtonStyle())
+                            .disabled(true)
+                            .opacity(0.7)
+                    }
                 } else if let product = selectedProduct {
                     Button {
                         Task { await purchase(product) }
@@ -272,14 +274,10 @@ struct PaywallView: View {
                 )
 
                 HStack(spacing: 10) {
-                    Link("Terms", destination: termsURL)
-                        .buttonStyle(AppQuietButtonStyle())
-                    Link("Privacy", destination: privacyURL)
-                        .buttonStyle(AppQuietButtonStyle())
-                    Link("Support", destination: supportURL)
-                        .buttonStyle(AppQuietButtonStyle())
-                    Link("Manage", destination: manageSubscriptionsURL)
-                        .buttonStyle(AppQuietButtonStyle())
+                    footerLink(title: "Terms", url: AppExternalLinks.termsURL)
+                    footerLink(title: "Privacy", url: AppExternalLinks.privacyURL)
+                    footerLink(title: "Support", url: AppExternalLinks.supportURL)
+                    footerLink(title: "Manage", url: AppExternalLinks.manageSubscriptionsURL)
                 }
             }
         }
@@ -312,5 +310,17 @@ struct PaywallView: View {
     private func close() {
         paywallController.dismiss()
         dismiss()
+    }
+
+    @ViewBuilder
+    private func footerLink(title: String, url: URL?) -> some View {
+        if let url {
+            Link(title, destination: url)
+                .buttonStyle(AppQuietButtonStyle())
+        } else {
+            Text(title)
+                .font(.system(size: 13, weight: .medium, design: .rounded))
+                .foregroundStyle(AppTheme.warning)
+        }
     }
 }

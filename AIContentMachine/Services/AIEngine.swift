@@ -38,24 +38,55 @@ struct AIEngine: ContentGenerationService {
 
         let baseline = try await baselineGenerator.generateContent(for: request)
         let prompt = promptBuilder.makePrompt(from: request)
+        let raw: String
 
         do {
-            let raw = try await client.send(prompt: prompt)
-            return try responseParser.parse(raw: raw, request: request, baseline: baseline)
+            raw = try await client.send(prompt: prompt)
         } catch {
-            logger.warn("Custom endpoint failed, falling back to offline mode: \(error.localizedDescription)", category: "AIEngine")
+            guard shouldFallbackToOffline(for: error) else {
+                throw error
+            }
 
-            var fallbackContent = baseline
-            fallbackContent.notes = (request.language == .german
-                ? "Hinweis: Der lokale AI-Server war nicht erreichbar. Dieser Entwurf wurde im Offline-Modus generiert."
-                : "Note: The local AI server could not be reached. This draft was generated in offline mode.")
-                + "\n" + fallbackContent.notes
-            return fallbackContent
+            logger.warn("Custom endpoint failed, falling back to offline mode: \(error.localizedDescription)", category: "AIEngine")
+            return makeFallbackContent(from: baseline, for: request)
         }
+
+        var parsed = try responseParser.parse(raw: raw, request: request, baseline: baseline)
+        parsed.origin = .provider
+        return parsed
     }
 
     func regenerateSection(_ section: ContentSection, for request: GenerationRequest) async throws -> GeneratedContent {
         try await generateContent(for: request)
+    }
+}
+
+private extension AIEngine {
+    func shouldFallbackToOffline(for error: Error) -> Bool {
+        switch error {
+        case is NetworkFailure:
+            return true
+        case let generationError as GenerationError:
+            if case .providerFailure = generationError {
+                return true
+            }
+            return false
+        case is URLError:
+            return true
+        default:
+            return false
+        }
+    }
+
+    func makeFallbackContent(from baseline: GeneratedContent, for request: GenerationRequest) -> GeneratedContent {
+        var fallbackContent = baseline
+        let notice = request.language == .german
+            ? "Hinweis: Der lokale AI-Server konnte nicht genutzt werden. Dieser Entwurf wurde im Offline-Modus generiert."
+            : "Note: The local AI server could not be used. This draft was generated in offline mode."
+
+        fallbackContent.notes = baseline.notes.isEmpty ? notice : "\(notice)\n\(baseline.notes)"
+        fallbackContent.origin = .providerFallback
+        return fallbackContent
     }
 }
 

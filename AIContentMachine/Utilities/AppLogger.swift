@@ -15,11 +15,15 @@ struct ConsoleAppLogger: AppLogger {
     }
 
     func info(_ message: String, category: String) {
+#if DEBUG
         print("[INFO][\(category)] \(message)")
+#endif
     }
 
     func warn(_ message: String, category: String) {
+#if DEBUG
         print("[WARN][\(category)] \(message)")
+#endif
     }
 
     func error(_ message: String, category: String) {

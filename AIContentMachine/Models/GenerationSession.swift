@@ -41,6 +41,7 @@ final class GenerationSession {
     var postingChecklist: [String]
     var postingTip: String
     var contentScore: Int
+    var generationOrigin: GenerationOrigin
     var hasSavedDraft: Bool
 
     init(
@@ -82,6 +83,7 @@ final class GenerationSession {
         postingChecklist: [String],
         postingTip: String,
         contentScore: Int,
+        generationOrigin: GenerationOrigin = .mock,
         hasSavedDraft: Bool = false
     ) {
         self.id = id
@@ -122,6 +124,7 @@ final class GenerationSession {
         self.postingChecklist = postingChecklist
         self.postingTip = postingTip
         self.contentScore = contentScore
+        self.generationOrigin = generationOrigin
         self.hasSavedDraft = hasSavedDraft
     }
 
@@ -168,6 +171,7 @@ final class GenerationSession {
         postingChecklist = generated.postingChecklist
         postingTip = generated.postingTip
         contentScore = generated.score
+        generationOrigin = generated.origin
         status = generated.status
     }
 
@@ -193,6 +197,7 @@ final class GenerationSession {
         case .notes:
             notes = regenerated.notes
         }
+        generationOrigin = regenerated.origin
     }
 
     func asContentProject(newID: UUID? = nil) -> ContentProject {
@@ -273,7 +278,8 @@ extension GenerationSession {
             thumbnailSuggestions: generated.thumbnailSuggestions,
             postingChecklist: generated.postingChecklist,
             postingTip: generated.postingTip,
-            contentScore: generated.score
+            contentScore: generated.score,
+            generationOrigin: generated.origin
         )
     }
 }

@@ -186,7 +186,7 @@ struct AuthView: View {
     }
 
     private var footerNote: some View {
-        Text("Email sign-in is the primary local path for now. Special Pro access is still respected internally and bypasses subscription checks when that account signs in.")
+        Text("Email sign-in is the primary local path for now. Additional sign-in providers stay hidden until their external setup is complete.")
             .font(.system(size: 12, weight: .medium, design: .rounded))
             .foregroundStyle(AppTheme.textMuted)
             .multilineTextAlignment(.center)

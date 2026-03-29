@@ -93,6 +93,7 @@ final class AppContainer: ObservableObject {
             updateSettingsUseCase: updateSettingsUseCase,
             exportWorkspaceUseCase: exportWorkspaceUseCase,
             persistenceService: persistenceService,
+            endpointConnectionTester: DefaultEndpointConnectionTester(),
             logger: logger
         )
     }

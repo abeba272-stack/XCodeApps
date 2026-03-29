@@ -48,6 +48,20 @@ final class AppSettings {
 }
 
 extension AppSettings {
+    static func endpointURL(from value: String) -> URL? {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty, let url = URL(string: trimmed) else { return nil }
+
+        guard let scheme = url.scheme?.lowercased(),
+              ["http", "https"].contains(scheme),
+              let host = url.host,
+              !host.isEmpty else {
+            return nil
+        }
+
+        return url
+    }
+
     var appLanguage: AppLanguage {
         get { AppLanguage(rawValue: appLanguageRaw) ?? AppLanguage.systemDefault() }
         set { appLanguageRaw = newValue.rawValue }
@@ -75,7 +89,7 @@ extension AppSettings {
     }
 
     var localServerURL: URL? {
-        URL(string: localServerEndpoint)
+        Self.endpointURL(from: localServerEndpoint)
     }
 
     var snapshot: AppSettingsSnapshot {
@@ -85,5 +99,28 @@ extension AppSettings {
             apiEndpoint: localServerEndpoint,
             apiModel: apiModel
         )
+    }
+}
+
+enum AppExternalLinks {
+    private static let manageSubscriptionsValue = "https://apps.apple.com/account/subscriptions"
+    private static let termsValue = "https://abeba272-stack.github.io/XCodeApps/terms.html"
+    private static let privacyValue = "https://abeba272-stack.github.io/XCodeApps/privacy.html"
+    private static let supportValue = "mailto:sundermannabeba@gmail.com"
+
+    static var manageSubscriptionsURL: URL? {
+        URL(string: manageSubscriptionsValue)
+    }
+
+    static var termsURL: URL? {
+        URL(string: termsValue)
+    }
+
+    static var privacyURL: URL? {
+        URL(string: privacyValue)
+    }
+
+    static var supportURL: URL? {
+        URL(string: supportValue)
     }
 }

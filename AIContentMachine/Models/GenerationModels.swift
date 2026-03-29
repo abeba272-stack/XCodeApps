@@ -1,5 +1,11 @@
 import Foundation
 
+enum GenerationOrigin: String, Codable, Hashable {
+    case mock
+    case provider
+    case providerFallback
+}
+
 struct GenerationRequest: Hashable {
     var topic: String
     var platform: ContentPlatform
@@ -76,6 +82,7 @@ struct GeneratedContent: Codable, Hashable {
     var postingTip: String
     var status: ProjectStatus
     var score: Int
+    var origin: GenerationOrigin = .mock
 }
 
 struct ExportBundle: Codable {

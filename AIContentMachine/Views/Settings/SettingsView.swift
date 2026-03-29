@@ -54,12 +54,6 @@ struct SettingsView: View {
                         .foregroundStyle(userSessionManager.hasProAccess ? AppTheme.success : AppTheme.textSecondary)
                 }
 
-                if profile.isSpecialProUser {
-                    Text("This device uses the internal special Pro account override. Store purchases are bypassed for this account.")
-                        .font(.footnote)
-                        .foregroundStyle(AppTheme.textSecondary)
-                }
-
                 Button("Sign Out", role: .destructive) {
                     userSessionManager.signOut()
                     dismiss()
@@ -157,13 +151,13 @@ struct SettingsView: View {
                     }
                 }
 
-                Link("Manage Subscription", destination: URL(string: "https://apps.apple.com/account/subscriptions")!)
+                externalLinkRow("Manage Subscription", url: AppExternalLinks.manageSubscriptionsURL)
             }
 
             Section("Legal & Support") {
-                Link("Terms of Service", destination: URL(string: "https://abeba272-stack.github.io/XCodeApps/terms.html")!)
-                Link("Privacy Policy", destination: URL(string: "https://abeba272-stack.github.io/XCodeApps/privacy.html")!)
-                Link("Support Email", destination: URL(string: "mailto:sundermannabeba@gmail.com")!)
+                externalLinkRow("Terms of Service", url: AppExternalLinks.termsURL)
+                externalLinkRow("Privacy Policy", url: AppExternalLinks.privacyURL)
+                externalLinkRow("Support Email", url: AppExternalLinks.supportURL)
             }
 
 #if DEBUG
@@ -318,6 +312,16 @@ struct SettingsView: View {
                     .buttonStyle(.plain)
                 }
             }
+        }
+    }
+
+    @ViewBuilder
+    private func externalLinkRow(_ title: String, url: URL?) -> some View {
+        if let url {
+            Link(title, destination: url)
+        } else {
+            Text("\(title) unavailable")
+                .foregroundStyle(AppTheme.warning)
         }
     }
 }

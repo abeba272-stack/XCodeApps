@@ -111,7 +111,12 @@ private struct ContentPool {
 
     static func resolve(category: String, language: ContentLanguage) -> ContentPool {
         let key = matchCategory(category)
-        return language == .german ? germanPools[key]! : englishPools[key]!
+        switch language {
+        case .german:
+            return germanPools[key] ?? germanPools["general"] ?? germanPools.values.first ?? fallbackPool(language: .german)
+        case .english:
+            return englishPools[key] ?? englishPools["general"] ?? englishPools.values.first ?? fallbackPool(language: .english)
+        }
     }
 
     private static func matchCategory(_ category: String) -> String {
@@ -129,6 +134,33 @@ private struct ContentPool {
         "tech": ["tech", "programming", "code", "software", "ai", "machine learning", "developer", "app"],
         "lifestyle": ["lifestyle", "travel", "fashion", "food", "beauty", "design", "creative", "art", "anime", "storytelling"]
     ]
+
+    private static func fallbackPool(language: ContentLanguage) -> ContentPool {
+        switch language {
+        case .german:
+            return ContentPool(
+                hooks: ["Hier ist ein klarer Hook fuer dein Thema"],
+                alternateHooks: ["Das ist der alternative Hook", "Das ist der zweite alternative Hook", "Das ist der dritte alternative Hook"],
+                scriptBeats: ["Hook setzen", "Kernidee erklaeren", "Naechsten Schritt zeigen"],
+                captionOpeners: ["Ein klarer Einstieg fuer dein Thema"],
+                ctas: ["Speichere dir das fuer spaeter"],
+                shotDirections: ["Nahaufnahme mit klarem Hook-Text"],
+                batchFormats: ["Die 3 Gruende, warum {{audience}} bei {{topic}} haengen bleiben"],
+                nicheTags: ["creator", "content", "strategie"]
+            )
+        case .english:
+            return ContentPool(
+                hooks: ["Here is a clear hook for your topic"],
+                alternateHooks: ["This is the first alternate hook", "This is the second alternate hook", "This is the third alternate hook"],
+                scriptBeats: ["Set the hook", "Explain the core idea", "Show the next step"],
+                captionOpeners: ["A clear opener for your topic"],
+                ctas: ["Save this for later"],
+                shotDirections: ["Close-up shot with clear hook text"],
+                batchFormats: ["The 3 reasons {{audience}} keep struggling with {{topic}}"],
+                nicheTags: ["creator", "content", "strategy"]
+            )
+        }
+    }
 
     // MARK: English pools
 
@@ -894,7 +926,14 @@ private struct ToneModifier {
     let adjectiveDe: String
 
     static func resolve(_ tone: ContentTone) -> ToneModifier {
-        modifiers[tone] ?? modifiers[.direct]!
+        modifiers[tone]
+            ?? modifiers[.direct]
+            ?? ToneModifier(
+                openerEn: "Most people are doing this backwards.",
+                openerDe: "Die meisten machen das rueckwaerts.",
+                adjectiveEn: "brief and no-nonsense",
+                adjectiveDe: "knapp und kompromisslos"
+            )
     }
 
     private static let modifiers: [ContentTone: ToneModifier] = [

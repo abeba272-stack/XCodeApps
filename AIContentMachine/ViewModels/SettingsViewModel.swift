@@ -1,6 +1,58 @@
 import Foundation
 import SwiftData
 
+protocol EndpointConnectionTesting: Sendable {
+    func testConnection(to endpoint: URL) async -> SettingsViewModel.ConnectionTestResult
+}
+
+struct DefaultEndpointConnectionTester: EndpointConnectionTesting, @unchecked Sendable {
+    private let session: URLSession
+
+    init(session: URLSession = .shared) {
+        self.session = session
+    }
+
+    func testConnection(to endpoint: URL) async -> SettingsViewModel.ConnectionTestResult {
+        do {
+            var request = URLRequest(url: endpoint)
+            request.httpMethod = "POST"
+            request.timeoutInterval = 6
+            request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+            request.httpBody = try JSONEncoder().encode(ConnectionProbePayload(prompt: "ping"))
+
+            let (data, response) = try await session.data(for: request)
+            guard let httpResponse = response as? HTTPURLResponse else {
+                return .init(success: false, message: "Server returned an invalid response.")
+            }
+
+            switch httpResponse.statusCode {
+            case 200..<300:
+                let body = String(data: data, encoding: .utf8)?
+                    .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                guard !body.isEmpty else {
+                    return .init(success: false, message: "Server responded, but the body was empty.")
+                }
+                return .init(success: true, message: "Connection successful (HTTP \(httpResponse.statusCode)).")
+            case 404, 405:
+                return .init(
+                    success: false,
+                    message: "Server is reachable, but this endpoint rejected the ACM probe (HTTP \(httpResponse.statusCode)). Check the endpoint path."
+                )
+            case 400..<500:
+                return .init(success: false, message: "Server is reachable, but the endpoint returned HTTP \(httpResponse.statusCode).")
+            case 500..<600:
+                return .init(success: false, message: "Server is reachable, but it failed with HTTP \(httpResponse.statusCode).")
+            default:
+                return .init(success: false, message: "Server returned an unexpected response (HTTP \(httpResponse.statusCode)).")
+            }
+        } catch let error as URLError {
+            return .init(success: false, message: "Could not reach server: \(error.localizedDescription)")
+        } catch {
+            return .init(success: false, message: "Connection test failed: \(error.localizedDescription)")
+        }
+    }
+}
+
 @MainActor
 final class SettingsViewModel: ObservableObject {
     @Published var email: String = ""
@@ -23,7 +75,7 @@ final class SettingsViewModel: ObservableObject {
     @Published var isTestingConnection = false
     @Published var connectionTestResult: ConnectionTestResult?
 
-    struct ConnectionTestResult {
+    struct ConnectionTestResult: Equatable {
         let success: Bool
         let message: String
     }
@@ -32,6 +84,7 @@ final class SettingsViewModel: ObservableObject {
     private let updateSettingsUseCase: UpdateSettingsUseCase
     private let exportWorkspaceUseCase: ExportWorkspaceUseCase
     private let persistenceService: any PersistenceService
+    private let endpointConnectionTester: any EndpointConnectionTesting
     private let logger: any AppLogger
 
     init(
@@ -39,12 +92,14 @@ final class SettingsViewModel: ObservableObject {
         updateSettingsUseCase: UpdateSettingsUseCase,
         exportWorkspaceUseCase: ExportWorkspaceUseCase,
         persistenceService: any PersistenceService,
+        endpointConnectionTester: any EndpointConnectionTesting,
         logger: any AppLogger
     ) {
         self.settingsService = settingsService
         self.updateSettingsUseCase = updateSettingsUseCase
         self.exportWorkspaceUseCase = exportWorkspaceUseCase
         self.persistenceService = persistenceService
+        self.endpointConnectionTester = endpointConnectionTester
         self.logger = logger
     }
 
@@ -88,12 +143,12 @@ final class SettingsViewModel: ObservableObject {
             return true
         }
 
-        guard trimmed.hasPrefix("http://") || trimmed.hasPrefix("https://") else {
+        guard trimmed.lowercased().hasPrefix("http://") || trimmed.lowercased().hasPrefix("https://") else {
             endpointValidationError = "URL must start with http:// or https://"
             return false
         }
 
-        guard URL(string: trimmed) != nil else {
+        guard AppSettings.endpointURL(from: trimmed) != nil else {
             endpointValidationError = "Invalid URL format."
             return false
         }
@@ -103,32 +158,19 @@ final class SettingsViewModel: ObservableObject {
     }
 
     func testConnection() async {
+        connectionTestResult = nil
         guard validateEndpoint() else { return }
 
         let trimmed = localServerEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard let url = URL(string: trimmed) else {
+        guard let url = AppSettings.endpointURL(from: trimmed) else {
             connectionTestResult = ConnectionTestResult(success: false, message: "Invalid URL.")
             return
         }
 
         isTestingConnection = true
-        connectionTestResult = nil
-
-        do {
-            var request = URLRequest(url: url)
-            request.httpMethod = "HEAD"
-            request.timeoutInterval = 6
-            let (_, response) = try await URLSession.shared.data(for: request)
-            if let http = response as? HTTPURLResponse, (200..<500).contains(http.statusCode) {
-                connectionTestResult = ConnectionTestResult(success: true, message: "Connection successful (HTTP \(http.statusCode)).")
-            } else {
-                connectionTestResult = ConnectionTestResult(success: false, message: "Server returned an unexpected response.")
-            }
-        } catch {
-            connectionTestResult = ConnectionTestResult(success: false, message: "Could not reach server: \(error.localizedDescription)")
-        }
-
-        isTestingConnection = false
+        defer { isTestingConnection = false }
+        let endpointConnectionTester = endpointConnectionTester
+        connectionTestResult = await endpointConnectionTester.testConnection(to: url)
     }
 
     func save(profile: UserProfile, settings: AppSettings) {
@@ -201,4 +243,8 @@ final class SettingsViewModel: ObservableObject {
             errorMessage = AppError.from(error, fallback: "Sample data could not be imported.").localizedDescription
         }
     }
+}
+
+private struct ConnectionProbePayload: Encodable {
+    let prompt: String
 }
