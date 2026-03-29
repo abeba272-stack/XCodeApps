@@ -34,7 +34,7 @@ enum AuthProvider: String, Codable, CaseIterable, Identifiable {
         case .google:
             return "Google"
         case .special:
-            return "Special"
+            return "Email"
         case .deviceMigration:
             return "Local"
         }

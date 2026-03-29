@@ -249,10 +249,10 @@ final class SwiftDataAuthService: AuthService {
         user.lastSignedInAt = .now
 
         settings.currentUserID = user.id
-        try save(context, fallback: "The special Pro account could not be activated.")
+        try save(context, fallback: "The account could not be activated.")
         return user
 #else
-        throw AppError.validation("The special Pro account is only available in local debug builds.")
+        throw AppError.validation("This sign-in path is not available in this build.")
 #endif
     }
 
