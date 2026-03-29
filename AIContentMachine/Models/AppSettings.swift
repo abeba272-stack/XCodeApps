@@ -3,7 +3,7 @@ import SwiftData
 
 @Model
 final class AppSettings {
-    static let defaultLocalServerEndpoint = "http://192.168.1.23:3000/chat"
+    static let defaultLocalServerEndpoint = "http://localhost:11434/api/generate"
 
     @Attribute(.unique) var id: UUID = UUID()
     var appLanguageRaw: String = ""

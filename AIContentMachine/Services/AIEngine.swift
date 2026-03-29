@@ -42,12 +42,15 @@ struct AIEngine: ContentGenerationService {
         do {
             let raw = try await client.send(prompt: prompt)
             return try responseParser.parse(raw: raw, request: request, baseline: baseline)
-        } catch let error as GenerationError {
-            logger.error("AI engine generation failed: \(error.localizedDescription)", category: "AIEngine")
-            throw error
         } catch {
-            logger.error("AI engine generation failed: \(error.localizedDescription)", category: "AIEngine")
-            throw GenerationError.providerFailure(AppError.from(error, fallback: "The local AI provider failed.").localizedDescription)
+            logger.warn("Custom endpoint failed, falling back to offline mode: \(error.localizedDescription)", category: "AIEngine")
+
+            var fallbackContent = baseline
+            fallbackContent.notes = (request.language == .german
+                ? "Hinweis: Der lokale AI-Server war nicht erreichbar. Dieser Entwurf wurde im Offline-Modus generiert."
+                : "Note: The local AI server could not be reached. This draft was generated in offline mode.")
+                + "\n" + fallbackContent.notes
+            return fallbackContent
         }
     }
 

@@ -19,6 +19,8 @@ final class ContentGeneratorViewModel: ObservableObject {
     @Published var session: GenerationSession?
     @Published var shareItems: [Any] = []
     @Published var didCopyMessage: String?
+    @Published var validationError: String?
+    @Published var infoMessage: String?
 
     private let generateContentUseCase: GenerateContentUseCase
     private let regenerateSectionUseCase: RegenerateSectionUseCase
@@ -73,11 +75,36 @@ final class ContentGeneratorViewModel: ObservableObject {
     }
 
     func buildRequest() throws -> GenerationRequest {
+        let trimmedTopic = topic.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedAudience = audience.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if trimmedTopic.isEmpty {
+            throw GenerationError.missingInput("Add a topic to generate content.")
+        }
+
+        if trimmedTopic.count < 3 {
+            throw GenerationError.missingInput("The topic must be at least 3 characters.")
+        }
+
+        if trimmedTopic.count > 200 {
+            throw GenerationError.missingInput("The topic must be 200 characters or fewer.")
+        }
+
+        if trimmedAudience.isEmpty {
+            throw GenerationError.missingInput("Add a target audience to generate content.")
+        }
+
+        if !trimmedAudience.isEmpty && trimmedAudience.count < 3 {
+            throw GenerationError.missingInput("The audience must be at least 3 characters.")
+        }
+
+        let sanitizedContext = Self.sanitizeUserContext(userContext)
+
         let request = GenerationRequest(
-            topic: topic,
+            topic: trimmedTopic,
             platform: platform,
             category: category.isEmpty ? "General" : category,
-            audience: audience,
+            audience: trimmedAudience,
             tone: tone,
             language: language,
             goal: goal,
@@ -85,21 +112,22 @@ final class ContentGeneratorViewModel: ObservableObject {
             durationSeconds: Int(durationSeconds),
             mode: mode,
             template: selectedTemplate,
-            userContext: userContext
+            userContext: sanitizedContext
         )
-
-        if request.topic.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            throw GenerationError.missingInput("Add a topic to generate content.")
-        }
-
-        if request.audience.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            throw GenerationError.missingInput("Add a target audience to generate content.")
-        }
 
         return request
     }
 
+    private static func sanitizeUserContext(_ context: String) -> String {
+        let cleaned = context.unicodeScalars.filter { scalar in
+            !CharacterSet.controlCharacters.subtracting(.whitespaces).contains(scalar)
+        }
+        return String(String.UnicodeScalarView(cleaned)).prefix(500).trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     func generate(settings: AppSettings) async {
+        guard !isGenerating else { return }
+
         do {
             let request = try buildRequest()
             switch featureAccessController.generationGate(settings: settings, mode: request.mode, template: selectedTemplate) {
@@ -113,10 +141,28 @@ final class ContentGeneratorViewModel: ObservableObject {
             latestRequest = request
             isGenerating = true
             errorMessage = nil
+            validationError = nil
+            infoMessage = nil
 
             let generated = try await generateContentUseCase.execute(request: request, settings: settings)
             applyGeneratedContent(generated, request: request)
             featureAccessController.recordSuccessfulGeneration(settings: settings)
+
+            // Detect offline fallback from AIEngine
+            if settings.providerMode == .customEndpoint,
+               generated.notes.contains("offline mode") || generated.notes.contains("Offline-Modus") {
+                infoMessage = request.language == .german
+                    ? "Der lokale AI-Server war nicht erreichbar. Dein Entwurf wurde im Offline-Modus generiert."
+                    : "The local AI server could not be reached. Your draft was generated in offline mode."
+            }
+        } catch let error as GenerationError {
+            switch error {
+            case .missingInput:
+                validationError = error.localizedDescription
+            default:
+                logger.error("Generate content failed: \(error.localizedDescription)", category: "ContentGeneratorViewModel")
+                errorMessage = AppError.from(error, fallback: "The content package could not be generated.").localizedDescription
+            }
         } catch {
             logger.error("Generate content failed: \(error.localizedDescription)", category: "ContentGeneratorViewModel")
             errorMessage = AppError.from(error, fallback: "The content package could not be generated.").localizedDescription

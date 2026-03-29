@@ -50,8 +50,8 @@ struct CreateContentView: View {
                         Text("Create Content")
                     }
                     .buttonStyle(AppPrimaryButtonStyle())
-                    .disabled(!canGenerate)
-                    .opacity(canGenerate ? 1 : 0.65)
+                    .disabled(!canGenerate || viewModel.isGenerating)
+                    .opacity(canGenerate && !viewModel.isGenerating ? 1 : 0.65)
 
                     if !subscriptionStore.isPro {
                         Text("Free includes \(FeatureAccessPolicy.freeGenerationLimitPerMonth) generations per month, Offline Mock, and all base workflow features.")
@@ -92,6 +92,22 @@ struct CreateContentView: View {
             set: { if !$0 { viewModel.shareItems = [] } }
         )) {
             ShareSheet(items: viewModel.shareItems)
+        }
+        .alert("Validation", isPresented: Binding(
+            get: { viewModel.validationError != nil },
+            set: { if !$0 { viewModel.validationError = nil } }
+        )) {
+            Button("OK", role: .cancel) { viewModel.validationError = nil }
+        } message: {
+            Text(viewModel.validationError ?? "")
+        }
+        .alert("Offline Mode", isPresented: Binding(
+            get: { viewModel.infoMessage != nil },
+            set: { if !$0 { viewModel.infoMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) { viewModel.infoMessage = nil }
+        } message: {
+            Text(viewModel.infoMessage ?? "")
         }
     }
 

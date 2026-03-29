@@ -19,6 +19,14 @@ final class SettingsViewModel: ObservableObject {
     @Published var shareItems: [Any] = []
     @Published var errorMessage: String?
     @Published var toastMessage: String?
+    @Published var endpointValidationError: String?
+    @Published var isTestingConnection = false
+    @Published var connectionTestResult: ConnectionTestResult?
+
+    struct ConnectionTestResult {
+        let success: Bool
+        let message: String
+    }
 
     private let settingsService: any SettingsService
     private let updateSettingsUseCase: UpdateSettingsUseCase
@@ -73,7 +81,62 @@ final class SettingsViewModel: ObservableObject {
         }
     }
 
+    func validateEndpoint() -> Bool {
+        let trimmed = localServerEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
+        if trimmed.isEmpty {
+            endpointValidationError = nil
+            return true
+        }
+
+        guard trimmed.hasPrefix("http://") || trimmed.hasPrefix("https://") else {
+            endpointValidationError = "URL must start with http:// or https://"
+            return false
+        }
+
+        guard URL(string: trimmed) != nil else {
+            endpointValidationError = "Invalid URL format."
+            return false
+        }
+
+        endpointValidationError = nil
+        return true
+    }
+
+    func testConnection() async {
+        guard validateEndpoint() else { return }
+
+        let trimmed = localServerEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let url = URL(string: trimmed) else {
+            connectionTestResult = ConnectionTestResult(success: false, message: "Invalid URL.")
+            return
+        }
+
+        isTestingConnection = true
+        connectionTestResult = nil
+
+        do {
+            var request = URLRequest(url: url)
+            request.httpMethod = "HEAD"
+            request.timeoutInterval = 6
+            let (_, response) = try await URLSession.shared.data(for: request)
+            if let http = response as? HTTPURLResponse, (200..<500).contains(http.statusCode) {
+                connectionTestResult = ConnectionTestResult(success: true, message: "Connection successful (HTTP \(http.statusCode)).")
+            } else {
+                connectionTestResult = ConnectionTestResult(success: false, message: "Server returned an unexpected response.")
+            }
+        } catch {
+            connectionTestResult = ConnectionTestResult(success: false, message: "Could not reach server: \(error.localizedDescription)")
+        }
+
+        isTestingConnection = false
+    }
+
     func save(profile: UserProfile, settings: AppSettings) {
+        if providerMode == .customEndpoint && !validateEndpoint() {
+            errorMessage = endpointValidationError
+            return
+        }
+
         let draft = SettingsDraft(
             email: email,
             creatorName: creatorName,

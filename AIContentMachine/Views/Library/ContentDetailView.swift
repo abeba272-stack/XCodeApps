@@ -4,10 +4,12 @@ import UIKit
 
 struct ContentDetailView: View {
     @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
     @EnvironmentObject private var subscriptionStore: SubscriptionStore
     @EnvironmentObject private var paywallController: PaywallController
     @Bindable var project: ContentProject
     @State private var errorMessage: String?
+    @State private var showDeleteConfirmation = false
 
     private var videoPrompt: String {
         CopyExportService.videoPromptText(for: project)
@@ -33,15 +35,22 @@ struct ContentDetailView: View {
         .navigationTitle("Content Detail")
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                Button("Save") {
-                    project.updatedAt = .now
-                    do {
-                        try modelContext.save()
-                    } catch {
-                        errorMessage = "The project could not be saved right now."
+                HStack(spacing: 12) {
+                    Button("Delete", role: .destructive) {
+                        showDeleteConfirmation = true
                     }
+                    .foregroundStyle(.red)
+
+                    Button("Save") {
+                        project.updatedAt = .now
+                        do {
+                            try modelContext.save()
+                        } catch {
+                            errorMessage = "The project could not be saved right now."
+                        }
+                    }
+                    .buttonStyle(AppQuietButtonStyle())
                 }
-                .buttonStyle(AppQuietButtonStyle())
             }
         }
         .alert("Project", isPresented: Binding(
@@ -53,6 +62,15 @@ struct ContentDetailView: View {
             }
         } message: {
             Text(errorMessage ?? "")
+        }
+        .alert("Delete Project", isPresented: $showDeleteConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                modelContext.delete(project)
+                dismiss()
+            }
+        } message: {
+            Text("This project will be permanently deleted. This action cannot be undone. Continue?")
         }
     }
 

@@ -18,6 +18,8 @@ struct SettingsView: View {
 
     @StateObject private var viewModel: SettingsViewModel
     @State private var isRestoringPurchases = false
+    @State private var showClearDataConfirmation = false
+    @State private var showResetOnboardingConfirmation = false
 
     init(
         profile: UserProfile,
@@ -199,6 +201,23 @@ struct SettingsView: View {
                         .keyboardType(.URL)
                         .textInputAutocapitalization(.never)
                         .autocorrectionDisabled()
+
+                    if let endpointError = viewModel.endpointValidationError {
+                        Text(endpointError)
+                            .font(.footnote)
+                            .foregroundStyle(AppTheme.warning)
+                    }
+
+                    Button(viewModel.isTestingConnection ? "Testing…" : "Test Connection") {
+                        Task { await viewModel.testConnection() }
+                    }
+                    .disabled(viewModel.isTestingConnection)
+
+                    if let result = viewModel.connectionTestResult {
+                        Text(result.message)
+                            .font(.footnote)
+                            .foregroundStyle(result.success ? AppTheme.success : AppTheme.warning)
+                    }
                 }
             }
 
@@ -220,11 +239,10 @@ struct SettingsView: View {
                     }
                 }
                 Button("Clear Local Data", role: .destructive) {
-                    viewModel.clearLocalData(projects: projects, assignments: assignments)
+                    showClearDataConfirmation = true
                 }
                 Button("Reset Onboarding", role: .destructive) {
-                    viewModel.resetOnboarding(profile: profile)
-                    dismiss()
+                    showResetOnboardingConfirmation = true
                 }
             }
         }
@@ -267,6 +285,23 @@ struct SettingsView: View {
                         viewModel.toastMessage = nil
                     }
             }
+        }
+        .alert("Clear Local Data", isPresented: $showClearDataConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete All", role: .destructive) {
+                viewModel.clearLocalData(projects: projects, assignments: assignments)
+            }
+        } message: {
+            Text("All saved projects, templates, and settings will be permanently deleted. Continue?")
+        }
+        .alert("Reset Onboarding", isPresented: $showResetOnboardingConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Reset", role: .destructive) {
+                viewModel.resetOnboarding(profile: profile)
+                dismiss()
+            }
+        } message: {
+            Text("Onboarding will be reset. Your profile will be preserved. Continue?")
         }
     }
 
