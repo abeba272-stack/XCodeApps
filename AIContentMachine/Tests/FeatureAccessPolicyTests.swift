@@ -35,6 +35,16 @@ final class FeatureAccessPolicyTests: XCTestCase {
 
 @MainActor
 final class ContentGeneratorViewModelTests: XCTestCase {
+    func testBuildRequestRejectsWhitespaceOnlyTopic() throws {
+        let viewModel = try makeViewModel()
+        viewModel.topic = "   \n  "
+        viewModel.audience = "Founders"
+
+        XCTAssertThrowsError(try viewModel.buildRequest()) { error in
+            XCTAssertEqual(error.localizedDescription, "Add a topic to generate content.")
+        }
+    }
+
     func testBuildRequestRejectsEmptyTopic() throws {
         let viewModel = try makeViewModel()
         viewModel.audience = "Founders"
@@ -70,6 +80,16 @@ final class ContentGeneratorViewModelTests: XCTestCase {
         viewModel.audience = "AI"
         XCTAssertThrowsError(try viewModel.buildRequest()) { error in
             XCTAssertEqual(error.localizedDescription, "The audience must be at least 3 characters.")
+        }
+    }
+
+    func testBuildRequestRejectsWhitespaceOnlyAudience() throws {
+        let viewModel = try makeViewModel()
+        viewModel.topic = "Content systems"
+        viewModel.audience = "   \n  "
+
+        XCTAssertThrowsError(try viewModel.buildRequest()) { error in
+            XCTAssertEqual(error.localizedDescription, "Add a target audience to generate content.")
         }
     }
 
@@ -192,6 +212,26 @@ final class SettingsViewModelTests: XCTestCase {
             .init(
                 success: false,
                 message: "Server is reachable, but this endpoint rejected the ACM probe (HTTP 404). Check the endpoint path."
+            )
+        )
+    }
+
+    func testConnectionTestMapsMethodNotAllowedAsRejectedEndpoint() async {
+        MockURLProtocol.requestHandler = { request in
+            let response = HTTPURLResponse(url: request.url!, statusCode: 405, httpVersion: nil, headerFields: nil)!
+            return (response, Data("method not allowed".utf8))
+        }
+
+        let viewModel = makeSettingsViewModel(endpointConnectionTester: DefaultEndpointConnectionTester(session: makeSession()))
+        viewModel.localServerEndpoint = "http://localhost/method-not-allowed"
+
+        await viewModel.testConnection()
+
+        XCTAssertEqual(
+            viewModel.connectionTestResult,
+            .init(
+                success: false,
+                message: "Server is reachable, but this endpoint rejected the ACM probe (HTTP 405). Check the endpoint path."
             )
         )
     }

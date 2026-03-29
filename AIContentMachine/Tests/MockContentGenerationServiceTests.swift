@@ -116,6 +116,31 @@ final class MockContentGenerationServiceTests: XCTestCase {
         XCTAssertFalse(content.cta.isEmpty)
     }
 
+    func testUnknownCategoryStillProducesStructuredContent() async throws {
+        let service = MockContentGenerationService()
+        let request = GenerationRequest(
+            topic: "creator calm systems",
+            platform: .youtubeShorts,
+            category: "Totally Unknown Segment",
+            audience: "Solo founders",
+            tone: .educational,
+            language: .english,
+            goal: .authority,
+            style: .deepExplanation,
+            durationSeconds: 35,
+            mode: .fullPackage
+        )
+
+        let content = try await service.generateContent(for: request)
+
+        XCTAssertFalse(content.title.isEmpty)
+        XCTAssertFalse(content.hook.isEmpty)
+        XCTAssertFalse(content.script.isEmpty)
+        XCTAssertFalse(content.cta.isEmpty)
+        XCTAssertFalse(content.hashtags.isEmpty)
+        XCTAssertGreaterThan(content.score, 0)
+    }
+
     func testGenerationUsesFallbackTagsForNonAlphanumericInputs() async throws {
         let service = MockContentGenerationService()
         let request = GenerationRequest(
@@ -160,6 +185,22 @@ final class AIEngineTests: XCTestCase {
     func testGenerateContentFallsBackForReachabilityFailures() async throws {
         let engine = AIEngine(
             client: StubAIClient(result: .failure(NetworkFailure.transport("connection refused"))),
+            promptBuilder: StubPromptBuilder(),
+            responseParser: StubResponseParser(result: .success(makeGeneratedContent(notes: "Parsed"))),
+            baselineGenerator: StubBaselineGenerator(result: .success(makeGeneratedContent(notes: "Baseline note"))),
+            logger: StubLogger()
+        )
+
+        let content = try await engine.generateContent(for: makeRequest(language: .english))
+
+        XCTAssertEqual(content.origin, .fallback)
+        XCTAssertTrue(content.notes.contains("mock generator"))
+        XCTAssertTrue(content.notes.contains("Baseline note"))
+    }
+
+    func testGenerateContentFallsBackForTimeoutFailures() async throws {
+        let engine = AIEngine(
+            client: StubAIClient(result: .failure(NetworkFailure.timedOut)),
             promptBuilder: StubPromptBuilder(),
             responseParser: StubResponseParser(result: .success(makeGeneratedContent(notes: "Parsed"))),
             baselineGenerator: StubBaselineGenerator(result: .success(makeGeneratedContent(notes: "Baseline note"))),
