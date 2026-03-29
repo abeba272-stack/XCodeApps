@@ -139,17 +139,17 @@ final class SettingsViewModel: ObservableObject {
     func validateEndpoint() -> Bool {
         let trimmed = localServerEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
         if trimmed.isEmpty {
-            endpointValidationError = nil
-            return true
+            endpointValidationError = "Add a local server endpoint."
+            return false
         }
 
         guard trimmed.lowercased().hasPrefix("http://") || trimmed.lowercased().hasPrefix("https://") else {
-            endpointValidationError = "URL must start with http:// or https://"
+            endpointValidationError = "Enter a valid URL starting with http:// or https://."
             return false
         }
 
         guard AppSettings.endpointURL(from: trimmed) != nil else {
-            endpointValidationError = "Invalid URL format."
+            endpointValidationError = "Enter a valid local server URL."
             return false
         }
 
@@ -159,11 +159,17 @@ final class SettingsViewModel: ObservableObject {
 
     func testConnection() async {
         connectionTestResult = nil
-        guard validateEndpoint() else { return }
+        guard validateEndpoint() else {
+            connectionTestResult = ConnectionTestResult(
+                success: false,
+                message: endpointValidationError ?? "Enter a valid local server URL."
+            )
+            return
+        }
 
         let trimmed = localServerEndpoint.trimmingCharacters(in: .whitespacesAndNewlines)
         guard let url = AppSettings.endpointURL(from: trimmed) else {
-            connectionTestResult = ConnectionTestResult(success: false, message: "Invalid URL.")
+            connectionTestResult = ConnectionTestResult(success: false, message: "Enter a valid local server URL.")
             return
         }
 

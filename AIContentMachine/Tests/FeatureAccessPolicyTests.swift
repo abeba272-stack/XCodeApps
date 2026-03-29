@@ -133,12 +133,12 @@ final class ContentGeneratorViewModelTests: XCTestCase {
 
 @MainActor
 final class SettingsViewModelTests: XCTestCase {
-    func testValidateEndpointAllowsEmptyValue() {
+    func testValidateEndpointRejectsEmptyValue() {
         let viewModel = makeSettingsViewModel()
         viewModel.localServerEndpoint = ""
 
-        XCTAssertTrue(viewModel.validateEndpoint())
-        XCTAssertNil(viewModel.endpointValidationError)
+        XCTAssertFalse(viewModel.validateEndpoint())
+        XCTAssertEqual(viewModel.endpointValidationError, "Add a local server endpoint.")
     }
 
     func testValidateEndpointRejectsInvalidValue() {
@@ -146,7 +146,19 @@ final class SettingsViewModelTests: XCTestCase {
         viewModel.localServerEndpoint = "ftp://localhost:11434"
 
         XCTAssertFalse(viewModel.validateEndpoint())
-        XCTAssertEqual(viewModel.endpointValidationError, "URL must start with http:// or https://")
+        XCTAssertEqual(viewModel.endpointValidationError, "Enter a valid URL starting with http:// or https://.")
+    }
+
+    func testConnectionTestReturnsValidationFailureForEmptyValue() async {
+        let viewModel = makeSettingsViewModel()
+        viewModel.localServerEndpoint = ""
+
+        await viewModel.testConnection()
+
+        XCTAssertEqual(
+            viewModel.connectionTestResult,
+            .init(success: false, message: "Add a local server endpoint.")
+        )
     }
 
     func testConnectionTestMapsSuccessAndRejectedEndpointResponses() async {
