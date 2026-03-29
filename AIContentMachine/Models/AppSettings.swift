@@ -109,18 +109,39 @@ enum AppExternalLinks {
     private static let supportValue = "mailto:sundermannabeba@gmail.com"
 
     static var manageSubscriptionsURL: URL? {
-        URL(string: manageSubscriptionsValue)
+        safeURL(from: manageSubscriptionsValue, allowedSchemes: ["http", "https"])
     }
 
     static var termsURL: URL? {
-        URL(string: termsValue)
+        safeURL(from: termsValue, allowedSchemes: ["http", "https"])
     }
 
     static var privacyURL: URL? {
-        URL(string: privacyValue)
+        safeURL(from: privacyValue, allowedSchemes: ["http", "https"])
     }
 
     static var supportURL: URL? {
-        URL(string: supportValue)
+        safeURL(from: supportValue, allowedSchemes: ["mailto"])
+    }
+
+    private static func safeURL(from value: String, allowedSchemes: Set<String>) -> URL? {
+        let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty,
+              let components = URLComponents(string: trimmed),
+              let scheme = components.scheme?.lowercased(),
+              allowedSchemes.contains(scheme) else {
+            return nil
+        }
+
+        switch scheme {
+        case "http", "https":
+            guard let host = components.host, !host.isEmpty else { return nil }
+        case "mailto":
+            guard !components.path.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        default:
+            return nil
+        }
+
+        return components.url
     }
 }

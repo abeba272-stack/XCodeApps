@@ -115,6 +115,30 @@ final class MockContentGenerationServiceTests: XCTestCase {
         XCTAssertFalse(content.caption.isEmpty)
         XCTAssertFalse(content.cta.isEmpty)
     }
+
+    func testGenerationUsesFallbackTagsForNonAlphanumericInputs() async throws {
+        let service = MockContentGenerationService()
+        let request = GenerationRequest(
+            topic: "!!! ???",
+            platform: .tiktok,
+            category: "???",
+            audience: "Creators",
+            tone: .direct,
+            language: .english,
+            goal: .views,
+            style: .educational,
+            durationSeconds: 25,
+            mode: .fullPackage
+        )
+
+        let content = try await service.generateContent(for: request)
+
+        XCTAssertFalse(content.hashtags.isEmpty)
+        XCTAssertTrue(content.hashtags.allSatisfy { $0.count > 1 })
+        XCTAssertFalse(content.hashtags.contains("#"))
+        XCTAssertTrue(content.hashtags.contains("#content"))
+        XCTAssertTrue(content.hashtags.contains("#generalcreator"))
+    }
 }
 
 final class AIEngineTests: XCTestCase {

@@ -42,7 +42,6 @@ struct MockContentGenerationService: ContentGenerationService {
         let thumbnails = localizedThumbnailSuggestions(topic: topic, request: request)
         let postingChecklist = localizedPostingChecklist(request: request)
         let postingTip = localizedPostingTip(request: request)
-        let videoAIPrompt = buildVideoAIPrompt(topic: topic, request: request, hook: hook, shotList: shotList)
         let batchIdeas = request.mode == .batchIdeas ? buildBatchIdeas(topic: topic, category: category, pool: pool, request: request, seed: seed) : []
 
         var generated = GeneratedContent(
@@ -111,12 +110,14 @@ private struct ContentPool {
 
     static func resolve(category: String, language: ContentLanguage) -> ContentPool {
         let key = matchCategory(category)
+        let resolved: ContentPool
         switch language {
         case .german:
-            return germanPools[key] ?? germanPools["general"] ?? germanPools.values.first ?? fallbackPool(language: .german)
+            resolved = germanPools[key] ?? germanPools["general"] ?? germanPools.values.first ?? fallbackPool(language: .german)
         case .english:
-            return englishPools[key] ?? englishPools["general"] ?? englishPools.values.first ?? fallbackPool(language: .english)
+            resolved = englishPools[key] ?? englishPools["general"] ?? englishPools.values.first ?? fallbackPool(language: .english)
         }
+        return resolved.normalized(for: language)
     }
 
     private static func matchCategory(_ category: String) -> String {
@@ -160,6 +161,36 @@ private struct ContentPool {
                 nicheTags: ["creator", "content", "strategy"]
             )
         }
+    }
+
+    func normalized(for language: ContentLanguage) -> ContentPool {
+        let fallback = Self.fallbackPool(language: language)
+        return ContentPool(
+            hooks: Self.supplemented(hooks, with: fallback.hooks, minimumCount: 1),
+            alternateHooks: Self.supplemented(alternateHooks, with: fallback.alternateHooks, minimumCount: 3),
+            scriptBeats: Self.supplemented(scriptBeats, with: fallback.scriptBeats, minimumCount: 3),
+            captionOpeners: Self.supplemented(captionOpeners, with: fallback.captionOpeners, minimumCount: 1),
+            ctas: Self.supplemented(ctas, with: fallback.ctas, minimumCount: 1),
+            shotDirections: Self.supplemented(shotDirections, with: fallback.shotDirections, minimumCount: 1),
+            batchFormats: Self.supplemented(batchFormats, with: fallback.batchFormats, minimumCount: 1),
+            nicheTags: Self.supplemented(nicheTags, with: fallback.nicheTags, minimumCount: 1)
+        )
+    }
+
+    private static func supplemented(_ values: [String], with fallback: [String], minimumCount: Int) -> [String] {
+        var combined = values.compactMap { value -> String? in
+            let trimmed = value.trimmingCharacters(in: .whitespacesAndNewlines)
+            return trimmed.isEmpty ? nil : trimmed
+        }
+
+        for candidate in fallback {
+            guard combined.count < minimumCount else { break }
+            let trimmed = candidate.trimmingCharacters(in: .whitespacesAndNewlines)
+            guard !trimmed.isEmpty, !combined.contains(trimmed) else { continue }
+            combined.append(trimmed)
+        }
+
+        return combined.isEmpty ? fallback : combined
     }
 
     // MARK: English pools
@@ -1072,10 +1103,10 @@ private extension MockContentGenerationService {
     }
 
     func buildHashtags(topic: String, category: String, pool: ContentPool, request: GenerationRequest) -> [String] {
-        let cleanTopic = cleanTag(from: topic)
-        let cleanCategory = cleanTag(from: category)
-        let goal = cleanTag(from: request.goal.rawValue)
-        let style = cleanTag(from: request.style.rawValue)
+        let cleanTopic = cleanTag(from: topic, fallback: "content")
+        let cleanCategory = cleanTag(from: category, fallback: "general")
+        let goal = cleanTag(from: request.goal.rawValue, fallback: "growth")
+        let style = cleanTag(from: request.style.rawValue, fallback: "strategy")
 
         var tags: [String] = []
 
@@ -1321,10 +1352,12 @@ private extension MockContentGenerationService {
         }
     }
 
-    func cleanTag(from string: String) -> String {
-        string
+    func cleanTag(from string: String, fallback: String = "content") -> String {
+        let cleaned = string
             .lowercased()
             .components(separatedBy: CharacterSet.alphanumerics.inverted)
             .joined()
+
+        return cleaned.isEmpty ? fallback : cleaned
     }
 }
